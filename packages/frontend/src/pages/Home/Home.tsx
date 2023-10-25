@@ -1,15 +1,18 @@
 import { Grid, Typography } from '@mui/material'
-import { useProfile, Account } from '../../common/hooks/useProfile'
+import { useUsers } from '../../common/hooks/useUsers'
+import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 
 const HomePage = () => {
-  const { data: profile, isLoading: isProfileLoading } = useProfile()
+  useIsLoggedIn()
 
-  const account = profile?.account as Account
+  // const { data: users, isLoading: isLoading } = useUsers()
+  // const account = profile?.account as Account
 
   return (
     <>
       <Typography variant="body2">
-        Välkommen {isProfileLoading ? '' : account?.name}!
+        Välkommen!
+        {/* Välkommen {isProfileLoading ? '' : account?.name}! */}
       </Typography>
       <br />
       <Typography variant="body2">

@@ -2,6 +2,14 @@ import configPackage from '@iteam/config'
 import dotenv from 'dotenv'
 dotenv.config()
 
+interface Postgres {
+  host: string
+  user: string
+  password: string
+  database: string
+  port: number
+}
+
 interface Account {
   id: string
   userName: string
@@ -11,6 +19,7 @@ interface Account {
 
 export interface Config {
   port: number
+  postgres: Postgres
   // core: {
   //   url: string
   //   username: string
@@ -23,15 +32,6 @@ export interface Config {
     cookieDomain: string
     testAccount: Account
   }
-  msal: {
-    clientId: string
-    cloudInstance: string
-    tenantId: string
-    clientSecret: string
-    redirectUri: string
-    graphApiEndpoint: string
-    postLogoutRedirectUri: string
-  }
 }
 
 const config = configPackage({
@@ -42,17 +42,17 @@ const config = configPackage({
       url: 'http://localhost:5010',
     },
     auth: {
-      secret: 'very secret. replace this',
+      secret: 'very secret. replace this with something smart',
       expiresIn: '3h', // format allowed by https://github.com/zeit/ms
       maxFailedLoginAttempts: 3,
       cookieDomain: 'localhost',
     },
-    msal: {
-      clientId: '',
-      cloudInstance: 'https://login.microsoftonline.com/',
-      tenantId: '',
-      clientSecret: '',
-      graphApiEndpoint: 'https://graph.microsoft.com/',
+    postgres: {
+      host: '127.0.0.1',
+      user: 'postgres',
+      password: 'postgrespassword',
+      database: 'readingroom',
+      port: 5433,
     },
   },
 })
@@ -61,5 +61,5 @@ export default {
   port: config.get('port'),
   core: config.get('core'),
   auth: config.get('auth'),
-  msal: config.get('msal'),
+  postgres: config.get('postgres'),
 } as Config

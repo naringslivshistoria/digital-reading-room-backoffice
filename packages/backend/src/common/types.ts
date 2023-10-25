@@ -39,4 +39,4 @@ export enum Role {
   User = 'User',
 }
 
-export type { Document, Field, Fields, User }
+export { Document, Field, Fields, User }

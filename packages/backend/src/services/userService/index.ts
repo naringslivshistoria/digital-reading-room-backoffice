@@ -5,18 +5,10 @@ export const routes = (router: KoaRouter) => {
   router.get('(.*)/user/users', async (ctx) => {
     const { query } = ctx
 
-    const users = getUsers()
+    const users = await getUsers()
 
     ctx.body = {
       users: users,
     }
-
-    // if (!query.password) {
-    //   ctx.status = 400
-    //   ctx.body = { errorMessage: 'Missing parameter: password' }
-    //   return
-    // }
-    // const saltAndHash = await hash.createSaltAndHash(query.password as string)
-    // ctx.body = saltAndHash
   })
 }

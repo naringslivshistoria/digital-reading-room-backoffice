@@ -14,6 +14,7 @@ import { SiteHeader } from './components/SiteHeader'
 import Login from './pages/Login/Login'
 import CentraleSansRegular from '../assets/CentraleSans-Regular.woff2'
 import PublicoTextItalic from '../assets/PublicoText-Italic.woff2'
+import Users from './pages/Users/Users'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -55,17 +56,17 @@ const mdTheme = createTheme({
       main: '#53565a',
     },
     background: {
-      default: 'white',
+      default: '#fff',
     },
     neutral: {
-      main: 'white',
+      main: '#fff',
     },
   },
   typography: {
     h1: {
       fontSize: 40,
       fontFamily: 'publicoTextItalic',
-      color: 'white',
+      color: '#fff',
       fontStyle: 'italic',
     },
     h2: {
@@ -102,6 +103,17 @@ const mdTheme = createTheme({
         ],
       },
     },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        head: {
+          fontWeight: 600,
+        },
+      },
+    },
   },
 })
 
@@ -110,9 +122,9 @@ const queryClient = new QueryClient({
     onError: (error, query) => {
       if ((error as AxiosError).response?.status === 401) {
         if (query && query.queryKey && query.queryKey[0] === 'search') {
-          // location.replace('/logga-in?query=' + query.queryKey[1])
+          location.replace('/logga-in?query=' + query.queryKey[1])
         } else {
-          // location.replace('/logga-in')
+          location.replace('/logga-in')
         }
       } else {
         console.log('An error occurred fetching data', error)
@@ -141,7 +153,7 @@ function App() {
             <Grid item md={6} xs={10} sx={{ paddingTop: 10 }}>
               <Routes>
                 <Route path="/" element={<Home></Home>} />
-                {/* <Route path="/logout" element={<Login></Login>} /> */}
+                <Route path="/users" element={<Users></Users>} />
                 <Route path="/logga-in" element={<Login></Login>} />
               </Routes>
             </Grid>

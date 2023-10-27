@@ -5,15 +5,9 @@ import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 const HomePage = () => {
   useIsLoggedIn()
 
-  // const { data: users, isLoading: isLoading } = useUsers()
-  // const account = profile?.account as Account
-
   return (
     <>
-      <Typography variant="body2">
-        Välkommen!
-        {/* Välkommen {isProfileLoading ? '' : account?.name}! */}
-      </Typography>
+      <Typography variant="body2">Välkommen!</Typography>
       <br />
       <Typography variant="body2">
         I backoffice för Digital läsesal kan du hantera de användare som har

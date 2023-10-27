@@ -29,7 +29,6 @@ const getUsers = async () => {
     )
     .from<User>('users')
 
-  console.log('rows', rows)
   return rows
 }
 

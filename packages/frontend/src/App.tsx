@@ -107,13 +107,9 @@ const mdTheme = createTheme({
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
-    onError: (error, query) => {
+    onError: (error) => {
       if ((error as AxiosError).response?.status === 401) {
-        if (query && query.queryKey && query.queryKey[0] === 'search') {
-          // location.replace('/logga-in?query=' + query.queryKey[1])
-        } else {
-          // location.replace('/logga-in')
-        }
+        location.replace('/logga-in')
       } else {
         console.log('An error occurred fetching data', error)
       }
@@ -141,7 +137,6 @@ function App() {
             <Grid item md={6} xs={10} sx={{ paddingTop: 10 }}>
               <Routes>
                 <Route path="/" element={<Home></Home>} />
-                {/* <Route path="/logout" element={<Login></Login>} /> */}
                 <Route path="/logga-in" element={<Login></Login>} />
               </Routes>
             </Grid>

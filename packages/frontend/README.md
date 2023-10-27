@@ -10,6 +10,12 @@
 5. npm run dev
 ```
 
+## Run tests
+
+## Run tests
+
+`npm run test` to run tests
+
 ## Prerequisites
 
 This application needs its backend counterpart (packages/backend in this repo) running

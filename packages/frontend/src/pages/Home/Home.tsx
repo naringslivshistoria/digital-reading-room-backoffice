@@ -1,16 +1,13 @@
 import { Grid, Typography } from '@mui/material'
-import { useProfile, Account } from '../../common/hooks/useProfile'
+import { useUsers } from '../../common/hooks/useUsers'
+import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 
 const HomePage = () => {
-  const { data: profile, isLoading: isProfileLoading } = useProfile()
-
-  const account = profile?.account as Account
+  useIsLoggedIn()
 
   return (
     <>
-      <Typography variant="body2">
-        Välkommen {isProfileLoading ? '' : account?.name}!
-      </Typography>
+      <Typography variant="body2">Välkommen!</Typography>
       <br />
       <Typography variant="body2">
         I backoffice för Digital läsesal kan du hantera de användare som har

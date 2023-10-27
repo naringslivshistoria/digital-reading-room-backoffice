@@ -1,6 +1,6 @@
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
 import axios from 'axios'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || '/api'
@@ -9,6 +9,7 @@ const Login = () => {
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [error, setError] = useState<boolean>(false)
+
   const navigate = useNavigate()
 
   const doLogin = async () => {
@@ -22,8 +23,7 @@ const Login = () => {
       })
 
       if (result.status === 200) {
-        history.replaceState
-        navigate('/')
+        location.href = '/'
       } else {
         setError(true)
       }

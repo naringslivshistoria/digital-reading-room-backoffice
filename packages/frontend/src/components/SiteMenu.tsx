@@ -10,6 +10,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state'
 import LogoutIcon from '@mui/icons-material/Logout'
+
 import { useIsLoggedIn } from '../common/hooks/useIsLoggedIn'
 
 export const SiteMenu = () => {

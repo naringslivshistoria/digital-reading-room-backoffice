@@ -15,6 +15,7 @@ import Login from './pages/Login/Login'
 import CentraleSansRegular from '../assets/CentraleSans-Regular.woff2'
 import PublicoTextItalic from '../assets/PublicoText-Italic.woff2'
 import Users from './pages/Users/Users'
+import { UserEdit } from './pages/Users/UserEdit'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -150,14 +151,13 @@ function App() {
           <SiteHeader />
           <Grid container bgcolor="white">
             <Grid item xs={1} />
-            <Grid item md={6} xs={10} sx={{ paddingTop: 10 }}>
-              <Routes>
-                <Route path="/" element={<Home></Home>} />
-                <Route path="/users" element={<Users></Users>} />
-                <Route path="/logga-in" element={<Login></Login>} />
-              </Routes>
-            </Grid>
-            <Grid item md={5} xs={1} />
+            <Routes>
+              <Route path="/" element={<Home></Home>} />
+              <Route path="/users/user" element={<UserEdit></UserEdit>} />
+              <Route path="/users" element={<Users></Users>} />
+              <Route path="/logga-in" element={<Login></Login>} />
+            </Routes>
+            <Grid item xs={1} />
           </Grid>
         </Box>
       </ThemeProvider>

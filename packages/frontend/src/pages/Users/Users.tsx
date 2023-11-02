@@ -1,4 +1,5 @@
 import {
+  Grid,
   Paper,
   Stack,
   Table,
@@ -9,65 +10,88 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUsers } from './hooks/useUsers'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { User } from '../../common/types'
 
 const Users = () => {
   useIsLoggedIn()
 
   const { data: data, isLoading: isLoading } = useUsers()
 
-  useEffect(() => {
-    console.log('data', data)
-  }, [data])
+  const getUserStatus = (user: User): string => {
+    if (user.locked) {
+      return 'Låst'
+    }
+
+    if (user.disabled) {
+      return 'Avaktiverat'
+    }
+
+    return 'Aktivt'
+  }
 
   return (
-    <Stack rowGap={4} justifyContent="flex-start">
-      <Typography variant="h2">Administrera användare</Typography>
-      <Typography variant="body2" sx={{ marginTop: 1 }}>
-        {data == null && isLoading
-          ? 'Användarna hämtas...'
-          : data == null && !isLoading
-          ? 'Inga användare hittades'
-          : ''}
-      </Typography>
+    <>
+      <Grid item md={10} xs={10} sx={{ paddingTop: 10 }}>
+        <Stack rowGap={4} justifyContent="flex-start">
+          <Typography variant="h2">Administrera användare</Typography>
+          <Typography variant="body2" sx={{ marginTop: 1 }}>
+            {data == null && isLoading
+              ? 'Användarna hämtas...'
+              : data == null && !isLoading
+              ? 'Inga användare hittades'
+              : ''}
+          </Typography>
 
-      {data != null && data?.users != null && (
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Användarnamn</TableCell>
-                <TableCell align="right">Arkiv</TableCell>
-                <TableCell align="right">Deponent</TableCell>
-                <TableCell align="right">Låst</TableCell>
-                <TableCell align="right">Inaktiverat</TableCell>
-                <TableCell align="right">Roll</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data?.users.map((user) => (
-                <TableRow
-                  key={user.id}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {user.username}
-                  </TableCell>
-                  <TableCell align="right">{user.archiveInitiators}</TableCell>
-                  <TableCell align="right">{user.depositors}</TableCell>
-                  <TableCell align="right">{user.locked}</TableCell>
-                  <TableCell align="right">{user.disabled}</TableCell>
-                  <TableCell align="right">{user.role}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-    </Stack>
+          {data != null && data?.users != null && (
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      Användarnamn (epost)
+                    </TableCell>
+                    <TableCell align="left">Deponenter</TableCell>
+                    <TableCell align="left">Arkiv</TableCell>
+                    <TableCell align="left">Roll</TableCell>
+                    <TableCell align="left">Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data?.users.map((user) => (
+                    <TableRow
+                      key={user.id}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        <Link to={`user?id=${user.id}`} state={{ user }}>
+                          {user.username}
+                        </Link>
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        width={'40%'}
+                        sx={{ textOverflow: 'ellipsis' }}
+                      >
+                        {user.depositors}
+                      </TableCell>
+                      <TableCell align="left" width={'25%'}>
+                        {user.archiveInitiators}
+                      </TableCell>
+                      <TableCell align="left">{user.role}</TableCell>
+                      <TableCell align="left">{getUserStatus(user)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Stack>
+      </Grid>
+    </>
   )
 }
 

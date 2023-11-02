@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios'
 import { useQuery } from 'react-query'
+
 import { User } from '../../../common/types'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || '/api'
@@ -17,25 +18,15 @@ export const useUsers = () => {
   return useQuery<UserResponse, AxiosError>({
     queryKey: ['users'],
     queryFn: async () => {
-      const { data } = await axios.get<UserResponse>(
-        `${backendUrl}/user/users`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Access-Control-Allow-Credentials': true,
-          },
-          withCredentials: true,
-        }
-      )
+      const { data } = await axios.get<UserResponse>(`${backendUrl}/users`, {
+        headers: {
+          Accept: 'application/json',
+          'Access-Control-Allow-Credentials': true,
+        },
+        withCredentials: true,
+      })
 
       return data
-    },
-    retry: (failureCount: number, error: AxiosError) => {
-      if (error.response?.status === 401) {
-        return false
-      } else {
-        return failureCount < 3
-      }
     },
     refetchOnWindowFocus: false,
     staleTime: Infinity,

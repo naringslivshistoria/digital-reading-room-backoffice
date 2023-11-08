@@ -1,6 +1,8 @@
 import {
+  Box,
   Button,
   Checkbox,
+  Divider,
   FormControl,
   FormControlLabel,
   Grid,
@@ -11,7 +13,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
@@ -20,20 +23,28 @@ import { Role, User } from '../../common/types'
 export const UserEdit = () => {
   useIsLoggedIn()
   const location = useLocation()
-
+  const navigate = useNavigate()
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
 
   const saveUser = async () => {
     if (editUser) {
       await updateUser.mutateAsync(editUser)
+
+      navigate('/users')
     }
   }
 
   return (
     editUser && (
       <>
-        <Grid item md={10} xs={10} sx={{ paddingTop: 10 }}>
+        <Grid item md={10} xs={10}>
+          <Box sx={{ marginTop: 3, marginBottom: 2 }}>
+            <Link to="/users">
+              <ChevronLeftIcon sx={{ marginTop: '-2px' }} /> Användare
+            </Link>
+          </Box>
+          <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
           <Typography variant="h2">Administrera användare</Typography>
           <Grid container spacing={4} sx={{ marginTop: 0 }}>
             <Grid item md={7} xs={12}>
@@ -161,7 +172,9 @@ export const UserEdit = () => {
               Avstängt
             </Grid>
             <Grid item md={12} xs={12}>
-              <Button onClick={saveUser}>Spara</Button>
+              <Button onClick={saveUser} variant="contained">
+                Spara
+              </Button>
             </Grid>
           </Grid>
         </Grid>

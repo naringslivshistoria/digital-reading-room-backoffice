@@ -1,6 +1,7 @@
 import knex from 'knex'
 import config from '../../../common/config'
 import { User } from '../../../common/types'
+import axios from 'axios'
 
 const db = knex({
   client: 'pg',
@@ -27,8 +28,8 @@ const getUsers = async () => {
       'role'
     )
     .from<User>('users')
+    .orderBy('username')
 
-  console.log('rows', rows)
   return rows
 }
 
@@ -56,10 +57,37 @@ const updateUser = async (user: User) => {
     id = user.id
     await db('users').update(user).where('id', id)
   } else {
-    id = await db('users').insert(user).returning('id')
+    try {
+      id = await db('users')
+        .insert({ ...user, salt: '', password_hash: '' })
+        .returning('id')
+    } catch (error: any) {
+      console.error('Error creating user', error.message)
+      if (
+        /^duplicate key value violates unique constraint/.test(error.message)
+      ) {
+        throw new Error(`Username ${user.username} is already in use`)
+      } else {
+        throw new Error('Error creating user')
+      }
+    }
+
+    axios(
+      `${config.readingRoom.url}/api/auth/send-reset-password-link?new=true&referer=${config.readingRoom.url}/login`,
+      {
+        data: {
+          email: user.username,
+        },
+        method: 'POST',
+      }
+    )
   }
 
   return id
 }
 
-export { getUsers, getUser, updateUser }
+const deleteUser = async (id: string) => {
+  await db('users').where({ id }).delete()
+}
+
+export { getUsers, getUser, updateUser, deleteUser }

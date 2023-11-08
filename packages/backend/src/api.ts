@@ -6,8 +6,6 @@ const router = new KoaRouter()
 userRoutes(router)
 
 router.get('(.*)/auth/is-logged-in', async (ctx) => {
-  console.log('isloggedin')
-  console.log('ctx.state?.user', ctx.state?.user)
   if (ctx.state?.user) {
     ctx.body = {
       username: ctx.state?.user?.username,

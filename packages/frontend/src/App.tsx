@@ -8,6 +8,7 @@ import {
 import { Routes, Route } from 'react-router-dom'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
 import { AxiosError } from 'axios'
+import { ConfirmProvider } from 'material-ui-confirm'
 
 import Home from './pages/Home/Home'
 import { SiteHeader } from './components/SiteHeader'
@@ -138,28 +139,30 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={mdTheme}>
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-          }}
-        >
-          <CssBaseline />
-          <SiteHeader />
-          <Grid container bgcolor="white">
-            <Grid item xs={1} />
-            <Routes>
-              <Route path="/" element={<Home></Home>} />
-              <Route path="/users/user" element={<UserEdit></UserEdit>} />
-              <Route path="/users" element={<Users></Users>} />
-              <Route path="/logga-in" element={<Login></Login>} />
-            </Routes>
-            <Grid item xs={1} />
-          </Grid>
-        </Box>
+        <ConfirmProvider>
+          <Box
+            component="main"
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'light'
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[900],
+            }}
+          >
+            <CssBaseline />
+            <SiteHeader />
+            <Grid container bgcolor="white">
+              <Grid item xs={1} />
+              <Routes>
+                <Route path="/" element={<Home></Home>} />
+                <Route path="/users/user" element={<UserEdit></UserEdit>} />
+                <Route path="/users" element={<Users></Users>} />
+                <Route path="/logga-in" element={<Login></Login>} />
+              </Routes>
+              <Grid item xs={1} />
+            </Grid>
+          </Box>
+        </ConfirmProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

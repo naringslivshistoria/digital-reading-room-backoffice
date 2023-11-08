@@ -58,7 +58,6 @@ const setUserLocked = async (
 export const createToken = async (username: string, password: string) => {
   try {
     const user = await getUser(username)
-    console.log('user', user)
     if (!user) {
       throw createHttpError(401, new Error(`Unknown user or invalid password.`))
     }

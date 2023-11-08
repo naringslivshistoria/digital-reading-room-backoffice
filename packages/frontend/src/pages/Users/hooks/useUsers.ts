@@ -29,6 +29,5 @@ export const useUsers = () => {
       return data
     },
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
   })
 }

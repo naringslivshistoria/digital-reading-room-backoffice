@@ -1,5 +1,10 @@
 import KoaRouter from '@koa/router'
-import { getUsers, getUser, updateUser } from './adapters/user-adapter'
+import {
+  getUsers,
+  getUser,
+  updateUser,
+  deleteUser,
+} from './adapters/user-adapter'
 import { User } from '../../common/types'
 
 export const routes = (router: KoaRouter) => {
@@ -12,16 +17,27 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.post('(.*)/users/:id', async (ctx) => {
-    const user = await updateUser(ctx.request.body as User)
+    try {
+      const user = await updateUser(ctx.request.body as User)
 
-    ctx.body = {
-      user: user,
+      ctx.body = {
+        user: user,
+      }
+    } catch (error: any) {
+      ctx.status = 400
+      ctx.body = {
+        error: error.message,
+      }
     }
   })
 
-  router.get('(.*)/users', async (ctx) => {
-    const { query } = ctx
+  router.delete('(.*)/users/:id', async (ctx) => {
+    await deleteUser(ctx.params.id)
 
+    ctx.status = 200
+  })
+
+  router.get('(.*)/users', async (ctx) => {
     const users = await getUsers()
 
     ctx.body = {

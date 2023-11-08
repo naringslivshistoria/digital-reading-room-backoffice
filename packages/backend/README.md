@@ -18,6 +18,12 @@ Start the development server: `npm run dev`
 
 Note: You need to have XYZ running for this application to work.
 
+## Run tests
+
+'''
+npm run test
+'''
+
 ## Env
 
 - template .env here

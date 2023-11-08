@@ -23,6 +23,7 @@ const getUsers = async () => {
       'username',
       'locked',
       'disabled',
+      'failed_login_attempts as failedLoginAttempts',
       'depositors',
       'archiveInitiators',
       'role'

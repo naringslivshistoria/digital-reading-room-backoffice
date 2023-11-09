@@ -23,7 +23,6 @@ const getUsers = async () => {
       'username',
       'locked',
       'disabled',
-      'failed_login_attempts as failedLoginAttempts',
       'depositors',
       'archiveInitiators',
       'role'
@@ -65,7 +64,7 @@ const updateUser = async (user: User) => {
     } catch (error: any) {
       console.error('Error creating user', error.message)
       if (
-        /^duplicate key value violates unique constraint/.test(error.message)
+        /duplicate key value violates unique constraint/.test(error.message)
       ) {
         throw new Error(`Username ${user.username} is already in use`)
       } else {
@@ -73,15 +72,19 @@ const updateUser = async (user: User) => {
       }
     }
 
-    axios(
-      `${config.readingRoom.url}/api/auth/send-reset-password-link?new=true&referer=${config.readingRoom.url}/login`,
-      {
-        data: {
-          email: user.username,
-        },
-        method: 'POST',
-      }
-    )
+    try {
+      axios(
+        `${config.readingRoom.url}/api/auth/send-reset-password-link?new=true&referer=${config.readingRoom.url}/login`,
+        {
+          data: {
+            email: user.username,
+          },
+          method: 'POST',
+        }
+      )
+    } catch (error: any) {
+      throw new Error('Could not send invitation/password select email')
+    }
   }
 
   return id

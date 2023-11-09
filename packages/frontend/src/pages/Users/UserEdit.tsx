@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -26,12 +27,17 @@ export const UserEdit = () => {
   const navigate = useNavigate()
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
+  const [error, setError] = useState<string | null>()
 
   const saveUser = async () => {
     if (editUser) {
-      await updateUser.mutateAsync(editUser)
-
-      navigate('/users')
+      setError(null)
+      try {
+        await updateUser.mutateAsync(editUser)
+        navigate('/users')
+      } catch (axiosError: any) {
+        setError(axiosError.response.data.error)
+      }
     }
   }
 
@@ -46,7 +52,11 @@ export const UserEdit = () => {
           </Box>
           <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
           <Typography variant="h2">Administrera användare</Typography>
-          <Grid container spacing={4} sx={{ marginTop: 0 }}>
+          <Grid
+            container
+            spacing={4}
+            sx={{ marginTop: 0, marginBottom: '40px' }}
+          >
             <Grid item md={7} xs={12}>
               <TextField
                 id="username"
@@ -170,6 +180,9 @@ export const UserEdit = () => {
             </Grid>
             <Grid item md={5} xs={12}>
               Avstängt
+            </Grid>
+            <Grid item md={12} xs={12}>
+              {error && <Alert severity="error">{error}</Alert>}
             </Grid>
             <Grid item md={12} xs={12}>
               <Button onClick={saveUser} variant="contained">

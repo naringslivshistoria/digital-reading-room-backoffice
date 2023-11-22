@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         context:
-          - reading-room-backoffice-frontend
-          - reading-room-backoffice-backend
+          - frontend
+          - backend
 
     steps:
       - name: 🛎️ Checkout

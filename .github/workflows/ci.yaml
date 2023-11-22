@@ -40,8 +40,8 @@ jobs:
     strategy:
       matrix:
         context:
-          - reading-room-backoffice-frontend
-          - reading-room-backoffice-backend
+          - frontend
+          - backend
 
     steps:
       - name: 🛎️ Checkout
@@ -78,4 +78,4 @@ jobs:
           context: ./packages/${{ matrix.context }}
           push: true
           tags: |
-            ghcr.io/naringslivshistoria/${{ matrix.context }}:${{ steps.package-version.outputs.current-version}}
+            ghcr.io/naringslivshistoria/reading-room-backoffice-${{ matrix.context }}:${{ steps.package-version.outputs.current-version}}

@@ -22,12 +22,10 @@ interface Document {
 }
 
 interface User {
-  id: number
-  username: string
+  id: string | undefined
+  username: string | undefined
   locked: boolean
   disabled: boolean
-  passwordHash: string
-  salt: string
   failedLoginAttempts: number
   depositors: string | null
   archiveInitiators: string | null

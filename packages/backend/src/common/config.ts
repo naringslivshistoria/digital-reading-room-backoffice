@@ -20,11 +20,9 @@ interface Account {
 export interface Config {
   port: number
   postgres: Postgres
-  // core: {
-  //   url: string
-  //   username: string
-  //   password: string
-  // }
+  readingRoom: {
+    url: string
+  }
   auth: {
     secret: string
     expiresIn: string
@@ -38,8 +36,8 @@ const config = configPackage({
   file: `${__dirname}/../../config.json`,
   defaults: {
     port: 7001,
-    core: {
-      url: 'http://localhost:5010',
+    readingRoom: {
+      url: 'http://localhost:4002',
     },
     auth: {
       secret: 'very secret. replace this with something smart',
@@ -59,7 +57,7 @@ const config = configPackage({
 
 export default {
   port: config.get('port'),
-  core: config.get('core'),
+  readingRoom: config.get('readingRoom'),
   auth: config.get('auth'),
   postgres: config.get('postgres'),
 } as Config

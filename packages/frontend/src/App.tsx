@@ -8,12 +8,15 @@ import {
 import { Routes, Route } from 'react-router-dom'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
 import { AxiosError } from 'axios'
+import { ConfirmProvider } from 'material-ui-confirm'
 
 import Home from './pages/Home/Home'
 import { SiteHeader } from './components/SiteHeader'
 import Login from './pages/Login/Login'
 import CentraleSansRegular from '../assets/CentraleSans-Regular.woff2'
 import PublicoTextItalic from '../assets/PublicoText-Italic.woff2'
+import Users from './pages/Users/Users'
+import { UserEdit } from './pages/Users/UserEdit'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -55,17 +58,17 @@ const mdTheme = createTheme({
       main: '#53565a',
     },
     background: {
-      default: 'white',
+      default: '#fff',
     },
     neutral: {
-      main: 'white',
+      main: '#fff',
     },
   },
   typography: {
     h1: {
       fontSize: 40,
       fontFamily: 'publicoTextItalic',
-      color: 'white',
+      color: '#fff',
       fontStyle: 'italic',
     },
     h2: {
@@ -102,6 +105,17 @@ const mdTheme = createTheme({
         ],
       },
     },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        head: {
+          fontWeight: 600,
+        },
+      },
+    },
   },
 })
 
@@ -121,28 +135,30 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={mdTheme}>
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-          }}
-        >
-          <CssBaseline />
-          <SiteHeader />
-          <Grid container bgcolor="white">
-            <Grid item xs={1} />
-            <Grid item md={6} xs={10} sx={{ paddingTop: 10 }}>
+        <ConfirmProvider>
+          <Box
+            component="main"
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'light'
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[900],
+            }}
+          >
+            <CssBaseline />
+            <SiteHeader />
+            <Grid container bgcolor="white">
+              <Grid item xs={1} />
               <Routes>
                 <Route path="/" element={<Home></Home>} />
+                <Route path="/users/user" element={<UserEdit></UserEdit>} />
+                <Route path="/users" element={<Users></Users>} />
                 <Route path="/logga-in" element={<Login></Login>} />
               </Routes>
+              <Grid item xs={1} />
             </Grid>
-            <Grid item md={5} xs={1} />
-          </Grid>
-        </Box>
+          </Box>
+        </ConfirmProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

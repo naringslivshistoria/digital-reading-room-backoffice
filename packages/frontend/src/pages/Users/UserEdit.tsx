@@ -20,14 +20,18 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
 import { Role, User } from '../../common/types'
+import { useFieldValues } from './hooks/useFilters'
 
 export const UserEdit = () => {
   useIsLoggedIn()
+  const { data: filterConfigs } = useFieldValues({ filter: null })
   const location = useLocation()
   const navigate = useNavigate()
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
   const [error, setError] = useState<string | null>()
+  const [showDepositors, setShowDepositors] = useState(false)
+  const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
 
   const saveUser = async () => {
     if (editUser) {
@@ -119,9 +123,23 @@ export const UserEdit = () => {
               />
             </Grid>
             <Grid item md={5} xs={12}>
-              Ange de deponenter användaren ska kunna se i läsesalen. Allt
-              material för en deponent som anges här kommer vara åtkomligt för
-              användaren. Ange flera deponenter med kommatecken mellan.
+              <p>
+                Ange de deponenter användaren ska kunna se i läsesalen. Allt
+                material för en deponent som anges här kommer vara åtkomligt för
+                användaren. Ange flera deponenter med kommatecken mellan.
+              </p>
+              <p>
+                <button onClick={() => setShowDepositors(!showDepositors)}>
+                  <b>Visa tillgängliga deponenter</b>
+                </button>
+                {showDepositors &&
+                  filterConfigs &&
+                  filterConfigs
+                    .find(
+                      (filterConfig) => filterConfig.fieldName === 'depositor'
+                    )
+                    ?.allValues?.map((value) => <li key={value}>{value}</li>)}
+              </p>
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField
@@ -142,9 +160,28 @@ export const UserEdit = () => {
               />
             </Grid>
             <Grid item md={5} xs={12}>
-              Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
-              material för en arkivbildare som anges här kommer vara åtkomligt
-              för användaren. Ange flera arkivbildare med kommatecken mellan.
+              <p>
+                Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
+                material för en arkivbildare som anges här kommer vara åtkomligt
+                för användaren. Ange flera arkivbildare med kommatecken mellan.
+              </p>
+              <p>
+                <button
+                  onClick={() =>
+                    setShowArchiveInitiators(!showArchiveInitiators)
+                  }
+                >
+                  <b>Visa tillgängliga arkiv</b>
+                </button>
+                {showArchiveInitiators &&
+                  filterConfigs &&
+                  filterConfigs
+                    .find(
+                      (filterConfig) =>
+                        filterConfig.fieldName === 'archiveInitiator'
+                    )
+                    ?.allValues?.map((value) => <li key={value}>{value}</li>)}
+              </p>
             </Grid>
             <Grid item md={7} xs={12}>
               <FormControlLabel
@@ -179,7 +216,8 @@ export const UserEdit = () => {
               />
             </Grid>
             <Grid item md={5} xs={12}>
-              Avstängt
+              Om ett konto är låst så har det låsts manuellt av en
+              administratör.
             </Grid>
             <Grid item md={12} xs={12}>
               {error && <Alert severity="error">{error}</Alert>}

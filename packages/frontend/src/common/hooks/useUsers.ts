@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios'
 import { useQuery } from 'react-query'
+
 import { User } from '../types'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || '/api'

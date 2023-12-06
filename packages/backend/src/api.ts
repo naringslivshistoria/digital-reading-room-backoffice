@@ -1,9 +1,11 @@
 import KoaRouter from '@koa/router'
 import { routes as userRoutes } from './services/userService'
+import { routes as searchRoutes } from './services/searchService'
 
 const router = new KoaRouter()
 
 userRoutes(router)
+searchRoutes(router)
 
 router.get('(.*)/auth/is-logged-in', async (ctx) => {
   if (ctx.state?.user) {

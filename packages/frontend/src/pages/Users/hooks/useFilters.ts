@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios'
 import { useQuery } from 'react-query'
 
-const readingRoomUrl = import.meta.env.VITE_READING_ROOM_URL || '/api'
+const backendUrl = import.meta.env.VITE_READING_ROOM_URL || '/api'
 
 export enum FilterType {
   freeText = 0,
@@ -32,7 +32,7 @@ export const useFieldValues = ({
     queryFn: async () => {
       const filterparam = filter ? '?filter=' + encodeURIComponent(filter) : ''
       const { data } = await axios.get(
-        `${readingRoomUrl}/search/get-field-filters${filterparam}`,
+        `${backendUrl}/search/get-field-filters${filterparam}`,
         {
           headers: {
             Accept: 'application/json',

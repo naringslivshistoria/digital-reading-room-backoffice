@@ -88,7 +88,7 @@ export const routes = (router: KoaRouter) => {
 
     try {
       const token = await createToken(username, password)
-      ctx.cookies.set('readingroombackoffice', token.token, cookieOptions)
+      ctx.cookies.set('readingroom', token.token, cookieOptions)
       ctx.body = token
     } catch (error) {
       if (createHttpError.isHttpError(error)) {
@@ -102,7 +102,7 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/auth/logout', async (ctx) => {
-    ctx.cookies.set('readingroombackoffice', null, cookieOptions)
+    ctx.cookies.set('readingroom', null, cookieOptions)
 
     ctx.redirect('/logga-in')
   })

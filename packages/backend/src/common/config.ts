@@ -40,7 +40,8 @@ const config = configPackage({
       url: 'http://localhost:4002',
     },
     auth: {
-      secret: 'very secret. replace this with something smart',
+      secret:
+        'Kungen, Drottningen, Kronprinsessan och Prins Daniel höll i dag ett videomöte med Kungl. Vetenskapsakademien.',
       expiresIn: '3h', // format allowed by https://github.com/zeit/ms
       maxFailedLoginAttempts: 3,
       cookieDomain: 'localhost',

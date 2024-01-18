@@ -126,7 +126,7 @@ export const UserEdit = () => {
               <p>
                 Ange de deponenter användaren ska kunna se i läsesalen. Allt
                 material för en deponent som anges här kommer vara åtkomligt för
-                användaren. Ange flera deponenter med kommatecken mellan.
+                användaren. Ange flera deponenter med semikolon mellan.
               </p>
               <p>
                 <button onClick={() => setShowDepositors(!showDepositors)}>
@@ -163,7 +163,7 @@ export const UserEdit = () => {
               <p>
                 Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
                 material för en arkivbildare som anges här kommer vara åtkomligt
-                för användaren. Ange flera arkivbildare med kommatecken mellan.
+                för användaren. Ange flera arkivbildare med semikolon mellan.
               </p>
               <p>
                 <button
@@ -204,7 +204,7 @@ export const UserEdit = () => {
             <Grid item md={5} xs={12}>
               <p>
                 Ange dokument-ID för de dokument användaren ska kunna se i
-                läsesalen. Ange flera dokument-ID med kommatecken mellan.
+                läsesalen. Ange flera dokument-ID med semikolon mellan.
               </p>
             </Grid>
             <Grid item md={7} xs={12}>

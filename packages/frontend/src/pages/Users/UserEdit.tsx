@@ -184,6 +184,30 @@ export const UserEdit = () => {
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
+              <TextField
+                id="documentIds"
+                label="Dokument"
+                variant="outlined"
+                multiline
+                rows={4}
+                value={editUser.documentIds ?? undefined}
+                onChange={(event) => {
+                  const updatedUser = {
+                    ...editUser,
+                  }
+                  updatedUser.documentIds = event.target.value
+                  setEditUser(updatedUser)
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item md={5} xs={12}>
+              <p>
+                Ange dokument-ID för de dokument användaren ska kunna se i
+                läsesalen. Ange flera dokument-ID med kommatecken mellan.
+              </p>
+            </Grid>
+            <Grid item md={7} xs={12}>
               <FormControlLabel
                 control={<Checkbox id="locked" />}
                 label="Låst"

@@ -8,16 +8,23 @@ const HomePage = () => {
   return (
     <>
       <Grid item md={6} xs={10} sx={{ paddingTop: 10 }}>
-        <Typography variant="body2">Välkommen!</Typography>
-        <br />
-        <Typography variant="body1">
-          I backoffice för Digital läsesal kan du hantera de användare som har
-          tillgång till de olika arkiven samt lägga upp nya användare.
-        </Typography>
-        <br />
-        <Link href="/users" title="Användare">
-          <b>Administrera användare</b>
-        </Link>
+        <Typography variant="h2">Användare</Typography>
+        <p>
+          <Link href="/users" title="Användare">
+            <b>Administrera användare</b>
+          </Link>
+        </p>
+        <Typography variant="h2">Indexerat innehåll</Typography>
+        <p>
+          <Link href="/imports" title="Importer">
+            <b>Importer</b>
+          </Link>
+        </p>
+        <p>
+          <Link href="/deletelevels" title="Ta bort levels">
+            <b>Ta bort levels</b>
+          </Link>
+        </p>
       </Grid>
     </>
   )

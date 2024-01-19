@@ -1,3 +1,5 @@
+import { LogLevel } from '@azure/msal-node'
+
 interface Field {
   id: number
   originalName: string
@@ -34,9 +36,32 @@ interface User {
   role: Role | null
 }
 
+interface ImportLevel {
+  id: number
+  level: string
+  created: Date
+  crawled: Date
+  error: string
+  successful: number
+  failed: number
+  attempts: number
+  batchName: string
+}
+
+interface Import {
+  importName: string
+  created: Date
+  crawled: Date
+  error: string
+  successful: number
+  failed: number
+  attempts: number
+  levels?: ImportLevel[]
+}
+
 export enum Role {
   Admin = 'Admin',
   User = 'User',
 }
 
-export { Document, Field, Fields, User }
+export { Document, Field, Fields, Import, ImportLevel, User }

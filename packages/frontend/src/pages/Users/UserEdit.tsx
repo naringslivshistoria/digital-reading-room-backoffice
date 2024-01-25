@@ -126,7 +126,7 @@ export const UserEdit = () => {
               <p>
                 Ange de deponenter användaren ska kunna se i läsesalen. Allt
                 material för en deponent som anges här kommer vara åtkomligt för
-                användaren. Ange flera deponenter med kommatecken mellan.
+                användaren. Ange flera deponenter med semikolon mellan.
               </p>
               <p>
                 <button onClick={() => setShowDepositors(!showDepositors)}>
@@ -163,7 +163,7 @@ export const UserEdit = () => {
               <p>
                 Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
                 material för en arkivbildare som anges här kommer vara åtkomligt
-                för användaren. Ange flera arkivbildare med kommatecken mellan.
+                för användaren. Ange flera arkivbildare med semikolon mellan.
               </p>
               <p>
                 <button
@@ -181,6 +181,30 @@ export const UserEdit = () => {
                         filterConfig.fieldName === 'archiveInitiator'
                     )
                     ?.allValues?.map((value) => <li key={value}>{value}</li>)}
+              </p>
+            </Grid>
+            <Grid item md={7} xs={12}>
+              <TextField
+                id="documentIds"
+                label="Dokument"
+                variant="outlined"
+                multiline
+                rows={4}
+                value={editUser.documentIds ?? undefined}
+                onChange={(event) => {
+                  const updatedUser = {
+                    ...editUser,
+                  }
+                  updatedUser.documentIds = event.target.value
+                  setEditUser(updatedUser)
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item md={5} xs={12}>
+              <p>
+                Ange dokument-ID för de dokument användaren ska kunna se i
+                läsesalen. Ange flera dokument-ID med semikolon mellan.
               </p>
             </Grid>
             <Grid item md={7} xs={12}>

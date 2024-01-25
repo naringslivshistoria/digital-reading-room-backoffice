@@ -14,10 +14,12 @@ const HomePage = () => {
             <b>Administrera användare</b>
           </Link>
         </p>
-        <Typography variant="h2">Indexerat innehåll</Typography>
+        <Typography variant="h2" sx={{ marginTop: '10px' }}>
+          Indexerat innehåll
+        </Typography>
         <p>
           <Link href="/imports" title="Importer">
-            <b>Importer</b>
+            <b>Administrera importer</b>
           </Link>
         </p>
         <p>

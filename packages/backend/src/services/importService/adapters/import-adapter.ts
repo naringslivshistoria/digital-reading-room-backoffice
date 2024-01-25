@@ -23,7 +23,8 @@ export const getImports = async () => {
     .min({ created: 'created' })
     .max({ crawled: 'crawled' })
     .from<Import>('levels')
-    .groupBy('depositor')) as Import[]
+    .groupBy('depositor')
+    .orderBy('created', 'desc')) as Import[]
 
   if (result.length > 0) {
     for (const importInstance of result) {

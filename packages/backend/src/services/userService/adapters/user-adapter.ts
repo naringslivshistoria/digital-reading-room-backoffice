@@ -25,6 +25,7 @@ const getUsers = async () => {
       'disabled',
       'depositors',
       'archiveInitiators',
+      'documentIds',
       'role'
     )
     .from<User>('users')
@@ -42,6 +43,7 @@ const getUser = async (id: string) => {
       'disabled',
       'depositors',
       'archiveInitiators',
+      'documentIds',
       'role'
     )
     .from<User>('users')

@@ -20,6 +20,7 @@ import { UserEdit } from './pages/Users/UserEdit'
 import Imports from './pages/Imports/Imports'
 import ImportDetails from './pages/Imports/ImportDetails'
 import { CreateImport } from './pages/Imports/CreateImport'
+import { DeleteLevels } from './pages/Imports/DeleteLevels'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -166,7 +167,10 @@ function App() {
                   path="/imports/import"
                   element={<ImportDetails></ImportDetails>}
                 />
-                <Route path="/deletelevels" element={<Imports></Imports>} />
+                <Route
+                  path="/deletelevels"
+                  element={<DeleteLevels></DeleteLevels>}
+                />
               </Routes>
               <Grid item xs={1} />
             </Grid>

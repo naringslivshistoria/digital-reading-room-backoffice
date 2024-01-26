@@ -24,6 +24,10 @@ export interface Config {
   readingRoom: {
     url: string
   }
+  elasticSearch: {
+    url: string
+    indexName: string
+  }
   auth: {
     secret: string
     expiresIn: string
@@ -47,6 +51,10 @@ const config = configPackage({
       maxFailedLoginAttempts: 3,
       cookieDomain: 'localhost',
     },
+    elasticSearch: {
+      url: 'http://localhost:9200',
+      indexName: 'comprima',
+    },
     postgres: {
       host: '127.0.0.1',
       user: 'postgres',
@@ -68,6 +76,7 @@ export default {
   port: config.get('port'),
   readingRoom: config.get('readingRoom'),
   auth: config.get('auth'),
+  elasticSearch: config.get('elasticSearch'),
   postgres: config.get('postgres'),
   indexDatabase: config.get('indexDatabase'),
 } as Config

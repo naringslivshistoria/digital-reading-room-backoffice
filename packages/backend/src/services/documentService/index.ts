@@ -1,7 +1,7 @@
 import KoaRouter from '@koa/router'
 import config from '../../common/config'
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types'
-import { Client, errors } from '@elastic/elasticsearch'
+import { Client } from '@elastic/elasticsearch'
 
 const client = new Client({
   node: config.elasticSearch.url,

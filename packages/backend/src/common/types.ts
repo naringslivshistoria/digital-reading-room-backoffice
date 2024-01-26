@@ -1,5 +1,3 @@
-import { LogLevel } from '@azure/msal-node'
-
 interface Field {
   id: number
   originalName: string

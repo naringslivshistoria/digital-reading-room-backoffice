@@ -23,10 +23,13 @@ export const routes = (router: KoaRouter) => {
       ctx.body = {
         user: user,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       ctx.status = 400
-      ctx.body = {
-        error: error.message,
+
+      if (error instanceof Error) {
+        ctx.body = {
+          error: error.message,
+        }
       }
     }
   })

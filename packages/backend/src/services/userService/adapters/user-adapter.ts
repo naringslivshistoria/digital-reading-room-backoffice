@@ -26,6 +26,7 @@ const getUsers = async () => {
       'depositors',
       'archiveInitiators',
       'documentIds',
+      'fileNames',
       'role'
     )
     .from<User>('users')
@@ -44,6 +45,7 @@ const getUser = async (id: string) => {
       'depositors',
       'archiveInitiators',
       'documentIds',
+      'fileNames',
       'role'
     )
     .from<User>('users')

@@ -30,6 +30,7 @@ interface User {
   depositors: string | null
   archiveInitiators: string | null
   documentIds: string | null
+  fileNames: string | null
   role: Role | null
 }
 

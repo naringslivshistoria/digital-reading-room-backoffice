@@ -118,7 +118,9 @@ const ImportDetails = () => {
                     {editImport.levels.map((level: ImportLevel) => (
                       <TableRow key={level.level}>
                         <TableCell>{level.level}</TableCell>
-                        <TableCell>{level.crawled as string}</TableCell>
+                        <TableCell>
+                          {level.crawled as unknown as string}
+                        </TableCell>
                         <TableCell>{level.successful}</TableCell>
                         <TableCell>{level.error}</TableCell>
                       </TableRow>

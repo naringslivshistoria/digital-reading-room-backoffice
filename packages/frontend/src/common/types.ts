@@ -22,10 +22,12 @@ interface Document {
 }
 
 interface User {
-  id: string | undefined
-  username: string | undefined
+  id: string
+  username: string
   locked: boolean
   disabled: boolean
+  passwordHash: string
+  salt: string
   failedLoginAttempts: number
   depositors: string | null
   archiveInitiators: string | null
@@ -34,9 +36,32 @@ interface User {
   role: Role | null
 }
 
+interface ImportLevel {
+  id: number
+  level: string
+  created: Date
+  crawled: Date
+  error: string
+  successful: number
+  failed: number
+  attempts: number
+  batchName: string
+}
+
+interface Import {
+  importName: string
+  created: Date
+  crawled: Date
+  error: string
+  successful: number
+  failed: number
+  attempts: number
+  levels?: ImportLevel[]
+}
+
 export enum Role {
   Admin = 'Admin',
   User = 'User',
 }
 
-export type { Document, Field, Fields, User }
+export type { Document, Field, Fields, Import, ImportLevel, User }

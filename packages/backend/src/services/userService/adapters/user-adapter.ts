@@ -65,7 +65,10 @@ const updateUser = async (user: User) => {
       id = await db('users')
         .insert({ ...user, salt: '', password_hash: '' })
         .returning('id')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (!(error instanceof Error)) {
+        throw error
+      }
       console.error('Error creating user', error.message)
       if (
         /duplicate key value violates unique constraint/.test(error.message)
@@ -86,7 +89,7 @@ const updateUser = async (user: User) => {
           method: 'POST',
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       throw new Error('Could not send invitation/password select email')
     }
   }

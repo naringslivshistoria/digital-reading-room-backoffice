@@ -17,6 +17,10 @@ import CentraleSansRegular from '../assets/CentraleSans-Regular.woff2'
 import PublicoTextItalic from '../assets/PublicoText-Italic.woff2'
 import Users from './pages/Users/Users'
 import { UserEdit } from './pages/Users/UserEdit'
+import Imports from './pages/Imports/Imports'
+import ImportDetails from './pages/Imports/ImportDetails'
+import { CreateImport } from './pages/Imports/CreateImport'
+import { DeleteLevels } from './pages/Imports/DeleteLevels'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -154,6 +158,19 @@ function App() {
                 <Route path="/users/user" element={<UserEdit></UserEdit>} />
                 <Route path="/users" element={<Users></Users>} />
                 <Route path="/logga-in" element={<Login></Login>} />
+                <Route path="/imports" element={<Imports></Imports>} />
+                <Route
+                  path="/imports/create"
+                  element={<CreateImport></CreateImport>}
+                />
+                <Route
+                  path="/imports/import"
+                  element={<ImportDetails></ImportDetails>}
+                />
+                <Route
+                  path="/deletelevels"
+                  element={<DeleteLevels></DeleteLevels>}
+                />
               </Routes>
               <Grid item xs={1} />
             </Grid>

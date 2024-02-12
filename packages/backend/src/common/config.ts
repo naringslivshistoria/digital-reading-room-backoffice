@@ -20,8 +20,13 @@ interface Account {
 export interface Config {
   port: number
   postgres: Postgres
+  indexDatabase: Postgres
   readingRoom: {
     url: string
+  }
+  elasticSearch: {
+    url: string
+    indexName: string
   }
   auth: {
     secret: string
@@ -46,11 +51,22 @@ const config = configPackage({
       maxFailedLoginAttempts: 3,
       cookieDomain: 'localhost',
     },
+    elasticSearch: {
+      url: 'http://localhost:9200',
+      indexName: 'comprima',
+    },
     postgres: {
       host: '127.0.0.1',
       user: 'postgres',
       password: 'postgrespassword',
       database: 'readingroom',
+      port: 5433,
+    },
+    indexDatabase: {
+      host: '127.0.0.1',
+      user: 'postgres',
+      password: 'postgrespassword',
+      database: 'crawler',
       port: 5433,
     },
   },
@@ -60,5 +76,7 @@ export default {
   port: config.get('port'),
   readingRoom: config.get('readingRoom'),
   auth: config.get('auth'),
+  elasticSearch: config.get('elasticSearch'),
   postgres: config.get('postgres'),
+  indexDatabase: config.get('indexDatabase'),
 } as Config

@@ -10,6 +10,7 @@ const client = new Client({
 export const routes = (router: KoaRouter) => {
   router.post('(.*)/document/deletelevels', async (ctx) => {
     if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
       return (ctx.status = 403)
     }
 

@@ -18,6 +18,7 @@ router.get('(.*)/auth/is-logged-in', async (ctx) => {
       depositors: ctx.state?.user?.depositors,
       archiveInitiators: ctx.state?.user?.archiveInitiators,
     }
+    console.log(ctx.state?.user)
   } else {
     ctx.status = 401
   }

@@ -9,6 +9,11 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.post('(.*)/import', async (ctx) => {
+    if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
+      return (ctx.status = 403)
+    }
+
     const name = ctx.request.body.name
     const levelIdsString = ctx.request.body.levelIds
     const imports = await createImport(name, levelIdsString.split(','))

@@ -96,6 +96,7 @@ export const createToken = async (username: string, password: string) => {
         username: user.username,
         depositors: user.depositors?.split(';'),
         archiveInitiators: user.archiveInitiators?.split(';'),
+        role: user.role,
       },
       config.auth.secret,
       {

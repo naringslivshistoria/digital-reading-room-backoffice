@@ -9,6 +9,11 @@ import { User } from '../../common/types'
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/users/:id', async (ctx) => {
+    if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
+      return (ctx.status = 403)
+    }
+
     const user = await getUser(ctx.params.id)
 
     ctx.body = {
@@ -17,6 +22,11 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.post('(.*)/users/:id', async (ctx) => {
+    if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
+      return (ctx.status = 403)
+    }
+
     try {
       const user = await updateUser(ctx.request.body as User)
 
@@ -35,12 +45,22 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.delete('(.*)/users/:id', async (ctx) => {
+    if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
+      return (ctx.status = 403)
+    }
+
     await deleteUser(ctx.params.id)
 
     ctx.status = 200
   })
 
   router.get('(.*)/users', async (ctx) => {
+    if (ctx.state.user.role !== 'Admin') {
+      console.error('User role is wrong', ctx.state.user)
+      return (ctx.status = 403)
+    }
+
     const users = await getUsers()
 
     ctx.body = {

@@ -33,6 +33,40 @@ export const UserEdit = () => {
   const [showDepositors, setShowDepositors] = useState(false)
   const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
 
+  const addDepositor = (depositor: string) => {
+    if (editUser.depositors) {
+      if (editUser.depositors.indexOf(depositor) !== -1) {
+        return
+      }
+    }
+
+    const updatedUser = { ...editUser }
+    if (updatedUser.depositors) {
+      updatedUser.depositors += ',' + depositor
+    } else {
+      updatedUser.depositors = depositor
+    }
+
+    setEditUser(updatedUser)
+  }
+
+  const addArchiveInitiator = (archiveInitiator: string) => {
+    if (editUser.archiveInitiators) {
+      if (editUser.archiveInitiators.indexOf(archiveInitiator) !== -1) {
+        return
+      }
+    }
+
+    const updatedUser = { ...editUser }
+    if (updatedUser.archiveInitiators) {
+      updatedUser.archiveInitiators += ', ' + archiveInitiator
+    } else {
+      updatedUser.archiveInitiators = archiveInitiator
+    }
+
+    setEditUser(updatedUser)
+  }
+
   const saveUser = async () => {
     if (editUser) {
       setError(null)
@@ -128,18 +162,41 @@ export const UserEdit = () => {
                 material för en deponent som anges här kommer vara åtkomligt för
                 användaren. Ange flera deponenter med semikolon mellan.
               </p>
-              <p>
+              <div>
                 <button onClick={() => setShowDepositors(!showDepositors)}>
                   <b>Visa tillgängliga deponenter</b>
                 </button>
-                {showDepositors &&
-                  filterConfigs &&
-                  filterConfigs
-                    .find(
-                      (filterConfig) => filterConfig.fieldName === 'depositor'
-                    )
-                    ?.allValues?.map((value) => <li key={value}>{value}</li>)}
-              </p>
+                {showDepositors && (
+                  <Box
+                    sx={{
+                      maxHeight: 300,
+                      overflow: 'scroll',
+                      padding: 2,
+                      border: '1px solid black',
+                    }}
+                  >
+                    {showDepositors &&
+                      filterConfigs &&
+                      filterConfigs
+                        .find(
+                          (filterConfig) =>
+                            filterConfig.fieldName === 'depositor'
+                        )
+                        ?.allValues?.map((value) => (
+                          <Box key={value} sx={{ alignContent: 'left' }}>
+                            <Button
+                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
+                              onClick={() => {
+                                addDepositor(value)
+                              }}
+                            >
+                              {value}
+                            </Button>
+                          </Box>
+                        ))}
+                  </Box>
+                )}
+              </div>
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField
@@ -165,7 +222,7 @@ export const UserEdit = () => {
                 material för en arkivbildare som anges här kommer vara åtkomligt
                 för användaren. Ange flera arkivbildare med semikolon mellan.
               </p>
-              <p>
+              <div>
                 <button
                   onClick={() =>
                     setShowArchiveInitiators(!showArchiveInitiators)
@@ -173,15 +230,37 @@ export const UserEdit = () => {
                 >
                   <b>Visa tillgängliga arkiv</b>
                 </button>
-                {showArchiveInitiators &&
-                  filterConfigs &&
-                  filterConfigs
-                    .find(
-                      (filterConfig) =>
-                        filterConfig.fieldName === 'archiveInitiator'
-                    )
-                    ?.allValues?.map((value) => <li key={value}>{value}</li>)}
-              </p>
+                {showArchiveInitiators && (
+                  <Box
+                    sx={{
+                      maxHeight: 300,
+                      overflow: 'scroll',
+                      padding: 2,
+                      border: '1px solid black',
+                    }}
+                  >
+                    {showArchiveInitiators &&
+                      filterConfigs &&
+                      filterConfigs
+                        .find(
+                          (filterConfig) =>
+                            filterConfig.fieldName === 'archiveInitiator'
+                        )
+                        ?.allValues?.map((value) => (
+                          <div key={value}>
+                            <Button
+                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
+                              onClick={() => {
+                                addArchiveInitiator(value)
+                              }}
+                            >
+                              {value}
+                            </Button>
+                          </div>
+                        ))}
+                  </Box>
+                )}
+              </div>
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField

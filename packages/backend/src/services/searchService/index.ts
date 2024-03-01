@@ -1,6 +1,6 @@
 import KoaRouter from '@koa/router'
-import axios from 'axios'
-import config from '../../common/config'
+import { FieldFilterConfig, FilterType } from '../../common/types'
+import { setValues } from './queryFunctions'
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/search/get-field-filters', async (ctx) => {
@@ -9,19 +9,32 @@ export const routes = (router: KoaRouter) => {
       return (ctx.status = 403)
     }
 
-    const cookies = ctx.cookies
-
-    const res = await axios(
-      `${config.readingRoom.url}/api/search/get-field-filters`,
+    const fieldFilterConfigs: FieldFilterConfig[] = [
       {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'readingroom=' + cookies.get('readingroom') + ';HttpOnly',
-        },
-      }
+        fieldName: 'depositor',
+        displayName: 'Deponent',
+        filterType: FilterType.values,
+        visualSize: 3,
+      },
+      {
+        fieldName: 'archiveInitiator',
+        parentField: 'depositor',
+        displayName: 'Arkivbildare',
+        filterType: FilterType.values,
+        visualSize: 3,
+      },
+    ]
+
+    await setValues(
+      fieldFilterConfigs,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'allValues'
     )
 
-    ctx.body = res.data
+    ctx.body = fieldFilterConfigs
   })
 }

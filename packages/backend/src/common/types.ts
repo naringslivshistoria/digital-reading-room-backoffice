@@ -63,4 +63,28 @@ export enum Role {
   User = 'User',
 }
 
-export { Document, Field, Fields, Import, ImportLevel, User }
+enum FilterType {
+  freeText = 0,
+  values = 1,
+}
+
+interface FieldFilterConfig {
+  fieldName: string
+  parentField?: string
+  displayName: string
+  filterType: FilterType
+  values?: string[]
+  allValues?: string[]
+  visualSize: number
+}
+
+export {
+  Document,
+  Field,
+  Fields,
+  Import,
+  ImportLevel,
+  User,
+  FilterType,
+  FieldFilterConfig,
+}

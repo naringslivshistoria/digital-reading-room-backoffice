@@ -12,7 +12,7 @@ importRoutes(router)
 documentRoutes(router)
 
 router.get('(.*)/auth/is-logged-in', async (ctx) => {
-  if (ctx.state?.user) {
+  if (ctx.state?.user && ctx.state?.user?.role === 'Admin') {
     ctx.body = {
       username: ctx.state?.user?.username,
       depositors: ctx.state?.user?.depositors,

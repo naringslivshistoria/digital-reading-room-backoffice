@@ -31,6 +31,10 @@ const getUser = async (username: string) => {
       'failed_login_attempts as failedLoginAttempts',
       'depositors',
       'archiveInitiators',
+      'documentIds',
+      'fileNames',
+      'reset_token',
+      'reset_token_expires',
       'role'
     )
     .from<User>('users')
@@ -58,6 +62,7 @@ const setUserLocked = async (
 export const createToken = async (username: string, password: string) => {
   try {
     const user = await getUser(username)
+
     if (!user) {
       throw createHttpError(401, new Error(`Unknown user or invalid password.`))
     }
@@ -96,6 +101,7 @@ export const createToken = async (username: string, password: string) => {
         username: user.username,
         depositors: user.depositors?.split(';'),
         archiveInitiators: user.archiveInitiators?.split(';'),
+        fileNames: user.fileNames?.split(';'),
         role: user.role,
       },
       config.auth.secret,

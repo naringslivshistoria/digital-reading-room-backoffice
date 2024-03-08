@@ -42,7 +42,7 @@ export const UserEdit = () => {
 
     const updatedUser = { ...editUser }
     if (updatedUser.depositors) {
-      updatedUser.depositors += ',' + depositor
+      updatedUser.depositors += ';' + depositor
     } else {
       updatedUser.depositors = depositor
     }
@@ -59,7 +59,7 @@ export const UserEdit = () => {
 
     const updatedUser = { ...editUser }
     if (updatedUser.archiveInitiators) {
-      updatedUser.archiveInitiators += ', ' + archiveInitiator
+      updatedUser.archiveInitiators += ';' + archiveInitiator
     } else {
       updatedUser.archiveInitiators = archiveInitiator
     }

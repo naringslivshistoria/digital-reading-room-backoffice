@@ -12,9 +12,14 @@ import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state'
 import LogoutIcon from '@mui/icons-material/Logout'
 
 import { useIsLoggedIn } from '../common/hooks/useIsLoggedIn'
+import { useEffect } from 'react'
 
 export const SiteMenu = () => {
   const { data: user } = useIsLoggedIn()
+
+  useEffect(() => {
+    console.log('user siteMenu', user)
+  }, [user])
 
   return (
     <PopupState variant="popover" popupId="demo-popup-menu">
@@ -69,12 +74,18 @@ export const SiteMenu = () => {
                 <div>
                   <b>Tillgängliga arkiv:</b>
                   {user?.depositors &&
-                    user.depositors.map((depositor) => (
+                    user?.depositors.map((depositor) => (
                       <div key={depositor}>{depositor}</div>
                     ))}
                   {user?.archiveInitiators &&
-                    user.archiveInitiators.map((archiveInitiator) => (
+                    user?.archiveInitiators.map((archiveInitiator) => (
                       <div key={archiveInitiator}>{archiveInitiator}</div>
+                    ))}
+                  {user?.series &&
+                    user?.series.map((serie) => <div key={serie}>{serie}</div>)}
+                  {user?.volumes &&
+                    user?.volumes.map((volume) => (
+                      <div key={volume}>{volume}</div>
                     ))}
                 </div>
               </MenuItem>

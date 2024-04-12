@@ -161,6 +161,13 @@ export const UserEdit = () => {
                 Ange de deponenter användaren ska kunna se i läsesalen. Allt
                 material för en deponent som anges här kommer vara åtkomligt för
                 användaren. Ange flera deponenter med semikolon mellan.
+                Exempelvis:
+                <i>
+                  <br />
+                  Deponent1;
+                  <br />
+                  Deponent2;
+                </i>
               </p>
               <div>
                 <button onClick={() => setShowDepositors(!showDepositors)}>
@@ -219,8 +226,15 @@ export const UserEdit = () => {
             <Grid item md={5} xs={12}>
               <p>
                 Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
-                material för en arkivbildare som anges här kommer vara åtkomligt
-                för användaren. Ange flera arkivbildare med semikolon mellan.
+                material för en serie som anges här kommer vara åtkomligt för
+                användaren. Ange flera arkivbildare med semikolon mellan.
+                Exempelvis:
+                <i>
+                  <br />
+                  Deponent1&gt;Arkivbildare1;
+                  <br />
+                  Deponent2&gt;Arkivbildare1;
+                </i>
               </p>
               <div>
                 <button
@@ -264,6 +278,69 @@ export const UserEdit = () => {
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField
+                id="series"
+                label="Serier"
+                variant="outlined"
+                multiline
+                rows={4}
+                value={editUser.series ?? undefined}
+                onChange={(event) => {
+                  const updatedUser = {
+                    ...editUser,
+                  }
+                  updatedUser.series = event.target.value
+                  setEditUser(updatedUser)
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item md={5} xs={12}>
+              <p>
+                Ange de serier användaren ska kunna se i läsesalen. Allt
+                material för en arkivbildare som anges här kommer vara åtkomligt
+                för användaren. Ange flera volymer med semikolon mellan.
+                Exempelvis:
+                <i>
+                  <br />
+                  Deponent1&gt;Arkivbildare1&gt;SerieA;
+                  <br />
+                  Deponent2&gt;Arkivbildare1&gt;SerieM;
+                </i>
+              </p>
+            </Grid>
+            <Grid item md={7} xs={12}>
+              <TextField
+                id="volumes"
+                label="Volymer"
+                variant="outlined"
+                multiline
+                rows={4}
+                value={editUser.volumes ?? undefined}
+                onChange={(event) => {
+                  const updatedUser = {
+                    ...editUser,
+                  }
+                  updatedUser.volumes = event.target.value
+                  setEditUser(updatedUser)
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item md={5} xs={12}>
+              <p>
+                Ange de volymer användaren ska kunna se i läsesalen. Allt
+                material för en volym som anges här kommer vara åtkomligt för
+                användaren. Ange flera volymer med semikolon mellan. Exempelvis:
+                <br />
+                <i>
+                  Deponent1&gt;Arkivbildare1&gt;SerieA&gt;Volym1;
+                  <br />
+                  Deponent2&gt;Arkivbildare1&gt;SerieM&gt;Volym5;
+                </i>
+              </p>
+            </Grid>
+            <Grid item md={7} xs={12}>
+              <TextField
                 id="fileNames"
                 label="Dokument"
                 variant="outlined"
@@ -283,7 +360,15 @@ export const UserEdit = () => {
             <Grid item md={5} xs={12}>
               <p>
                 Ange filnamn för de dokument användaren ska kunna se i
-                läsesalen. Ange flera filnamn med semikolon mellan.
+                läsesalen. Ange flera filnamn med semikolon mellan. Exempelvis:
+                <i>
+                  <br />
+                  Filnamn1.jpg;
+                  <br />
+                  Filnamn2.pdf;
+                  <br />
+                  Filnamn10.pdf;
+                </i>
               </p>
             </Grid>
             <Grid item md={7} xs={12}>

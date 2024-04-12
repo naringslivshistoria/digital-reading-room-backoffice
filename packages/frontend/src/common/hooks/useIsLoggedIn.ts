@@ -7,6 +7,8 @@ export interface IsLoggedInResponse {
   username: string
   depositors?: string[] | null
   archiveInitiators?: string[] | null
+  series?: string[] | null
+  volumes?: string[] | null
 }
 
 export const useIsLoggedIn = () =>

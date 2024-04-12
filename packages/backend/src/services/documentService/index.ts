@@ -26,7 +26,7 @@ export const routes = (router: KoaRouter) => {
     })
 
     const result = await client.deleteByQuery({
-      index: 'comprima',
+      index: config.elasticSearch.indexName,
       query: {
         bool: {
           should,

@@ -150,7 +150,10 @@ export const UserEdit = () => {
                   const updatedUser = {
                     ...editUser,
                   }
-                  updatedUser.depositors = event.target.value
+                  updatedUser.depositors = event.target.value.replaceAll(
+                    '\n',
+                    ''
+                  )
                   setEditUser(updatedUser)
                 }}
                 fullWidth
@@ -162,8 +165,8 @@ export const UserEdit = () => {
                 material för en deponent som anges här kommer vara åtkomligt för
                 användaren. Ange flera deponenter med semikolon mellan.
                 Exempelvis:
+                <br />
                 <i>
-                  <br />
                   Deponent1;
                   <br />
                   Deponent2;
@@ -217,7 +220,10 @@ export const UserEdit = () => {
                   const updatedUser = {
                     ...editUser,
                   }
-                  updatedUser.archiveInitiators = event.target.value
+                  updatedUser.archiveInitiators = event.target.value.replaceAll(
+                    '\n',
+                    ''
+                  )
                   setEditUser(updatedUser)
                 }}
                 fullWidth
@@ -229,8 +235,8 @@ export const UserEdit = () => {
                 material för en serie som anges här kommer vara åtkomligt för
                 användaren. Ange flera arkivbildare med semikolon mellan.
                 Exempelvis:
+                <br />
                 <i>
-                  <br />
                   Deponent1&gt;Arkivbildare1;
                   <br />
                   Deponent2&gt;Arkivbildare1;
@@ -288,7 +294,7 @@ export const UserEdit = () => {
                   const updatedUser = {
                     ...editUser,
                   }
-                  updatedUser.series = event.target.value
+                  updatedUser.series = event.target.value.replaceAll('\n', '')
                   setEditUser(updatedUser)
                 }}
                 fullWidth
@@ -300,8 +306,8 @@ export const UserEdit = () => {
                 material för en arkivbildare som anges här kommer vara åtkomligt
                 för användaren. Ange flera volymer med semikolon mellan.
                 Exempelvis:
+                <br />
                 <i>
-                  <br />
                   Deponent1&gt;Arkivbildare1&gt;SerieA;
                   <br />
                   Deponent2&gt;Arkivbildare1&gt;SerieM;
@@ -320,7 +326,7 @@ export const UserEdit = () => {
                   const updatedUser = {
                     ...editUser,
                   }
-                  updatedUser.volumes = event.target.value
+                  updatedUser.volumes = event.target.value.replaceAll('\n', '')
                   setEditUser(updatedUser)
                 }}
                 fullWidth
@@ -361,8 +367,8 @@ export const UserEdit = () => {
               <p>
                 Ange filnamn för de dokument användaren ska kunna se i
                 läsesalen. Ange flera filnamn med semikolon mellan. Exempelvis:
+                <br />
                 <i>
-                  <br />
                   Filnamn1.jpg;
                   <br />
                   Filnamn2.pdf;

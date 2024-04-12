@@ -54,7 +54,6 @@ const getUser = async (id: string) => {
     )
     .from<User>('users')
     .where('id', id)
-  console.log('rows', rows)
   return rows.length > 0 ? rows[0] : null
 }
 

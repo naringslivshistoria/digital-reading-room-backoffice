@@ -113,8 +113,6 @@ export const createToken = async (username: string, password: string) => {
       }
     )
 
-    console.log('token', token)
-
     return { token }
   } catch (error) {
     console.error(error)

@@ -34,6 +34,8 @@ interface User {
   documentIds: string | null
   fileNames: string | null
   role: Role | null
+  volumes: string | null
+  series: string | null
 }
 
 interface ImportLevel {

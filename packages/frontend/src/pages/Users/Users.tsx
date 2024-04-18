@@ -74,7 +74,17 @@ const Users = () => {
               ? 'Inga användare hittades'
               : ''}
           </Typography>
-          <Link to="user" state={{ user: { username: '', role: '' } }}>
+          <Link
+            to="user"
+            state={{
+              user: {
+                username: '',
+                role: 'User',
+                depositors:
+                  'Centrum för Näringslivshistoria;Föreningen Stockholms Företagsminnen',
+              },
+            }}
+          >
             <Button variant="contained">Skapa användare</Button>
           </Link>
 

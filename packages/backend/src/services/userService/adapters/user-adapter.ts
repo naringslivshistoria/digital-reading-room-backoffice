@@ -27,6 +27,8 @@ const getUsers = async () => {
       'archiveInitiators',
       'documentIds',
       'fileNames',
+      'series',
+      'volumes',
       'role'
     )
     .from<User>('users')
@@ -46,11 +48,12 @@ const getUser = async (id: string) => {
       'archiveInitiators',
       'documentIds',
       'fileNames',
+      'series',
+      'volumes',
       'role'
     )
     .from<User>('users')
     .where('id', id)
-
   return rows.length > 0 ? rows[0] : null
 }
 

@@ -24,9 +24,6 @@ export const useUpdateUser = () => {
     onSuccess: () => {
       queryClient.invalidateQueries('users')
     },
-    // onError: () => {
-
-    // }
   })
 }
 

@@ -55,18 +55,6 @@ export const SiteHeader = () => (
             >
               Backoffice - Digital läsesal
             </Typography>
-            &nbsp;
-            <Typography
-              variant="h2"
-              sx={{
-                marginTop: { xs: '8px', sm: '12px' },
-                marginLeft: 1,
-                color: 'white',
-                fontSize: { xs: '17px', sm: '24px' },
-              }}
-            >
-              (beta)
-            </Typography>
           </Stack>
         </Link>
       </Stack>

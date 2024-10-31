@@ -68,23 +68,19 @@ export const UserEdit = () => {
     }
 
     setEditUser(updatedUser)
+    setSeriesList(newValue)
   }
 
-  const addArchiveInitiator = (archiveInitiator: string) => {
-    if (editUser.archiveInitiators) {
-      if (editUser.archiveInitiators.indexOf(archiveInitiator) !== -1) {
-        return
-      }
-    }
-
-    const updatedUser = { ...editUser }
-    if (updatedUser.archiveInitiators) {
-      updatedUser.archiveInitiators += ';' + archiveInitiator
-    } else {
-      updatedUser.archiveInitiators = archiveInitiator
-    }
-
+  const handleDepositorsChange = (event: any, newValue: string[]) => {
+    const updatedUser = { ...editUser, depositors: newValue.join(';') }
     setEditUser(updatedUser)
+    setSelectedDepositors(newValue)
+  }
+
+  const handleArchiveInitiatorsChange = (event: any, newValue: string[]) => {
+    const updatedUser = { ...editUser, archiveInitiators: newValue.join(';') }
+    setEditUser(updatedUser)
+    setSelectedArchiveInitiators(newValue)
   }
 
   const saveUser = async () => {
@@ -132,7 +128,9 @@ export const UserEdit = () => {
           <Typography variant="h2">Administrera användare</Typography>
           <Grid
             container
-            spacing={4}
+            //Spacing y
+            columnSpacing={4}
+            rowSpacing={4}
             sx={{ marginTop: 0, marginBottom: '40px' }}
           >
             <Grid item md={7} xs={12}>
@@ -235,224 +233,251 @@ export const UserEdit = () => {
                   setEditUser(updatedUser)
                 }}
                 fullWidth
+                disableCloseOnSelect
+                noOptionsText="Inga deponenter hittades"
               />
             </Grid>
             <Grid item md={5} xs={12}>
               <p>
                 Ange de deponenter användaren ska kunna se i läsesalen. Allt
                 material för en deponent som anges här kommer vara åtkomligt för
-                användaren. Ange flera deponenter med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1;
-                  <br />
-                  Deponent2;
-                </i>
+                användaren.
               </p>
-              <div>
-                <button onClick={() => setShowDepositors(!showDepositors)}>
-                  <b>Visa tillgängliga deponenter</b>
-                </button>
-                {showDepositors && (
-                  <Box
-                    sx={{
-                      maxHeight: 300,
-                      overflow: 'scroll',
-                      padding: 2,
-                      border: '1px solid black',
-                    }}
-                  >
-                    {showDepositors &&
-                      filterConfigs &&
-                      filterConfigs
-                        .find(
-                          (filterConfig) =>
-                            filterConfig.fieldName === 'depositor'
-                        )
-                        ?.allValues?.map((value) => (
-                          <Box key={value} sx={{ alignContent: 'left' }}>
-                            <Button
-                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
-                              onClick={() => {
-                                addDepositor(value)
-                              }}
-                            >
-                              {value}
-                            </Button>
-                          </Box>
-                        ))}
-                  </Box>
-                )}
-              </div>
             </Grid>
             <Grid item md={7} xs={12}>
-              <TextField
-                id="archiveInitiators"
-                label="Arkiv"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.archiveInitiators ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.archiveInitiators = event.target.value.replaceAll(
-                    '\n',
-                    ''
-                  )
-                  setEditUser(updatedUser)
-                }}
+              <Autocomplete
+                multiple
+                options={
+                  filterConfigs?.find(
+                    (filterConfig) =>
+                      filterConfig.fieldName === 'archiveInitiator'
+                  )?.allValues || []
+                }
+                value={selectedArchiveInitiators}
+                onChange={(event, newValue) =>
+                  handleArchiveInitiatorsChange(event, newValue)
+                }
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Lägg till arkiv genom att söka och klicka"
+                    placeholder="Sök arkiv..."
+                  />
+                )}
                 fullWidth
+                disableCloseOnSelect
+                noOptionsText="Inga arkiv hittades"
               />
             </Grid>
             <Grid item md={5} xs={12}>
               <p>
                 Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
-                material för en serie som anges här kommer vara åtkomligt för
-                användaren. Ange flera arkivbildare med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1;
-                  <br />
-                  Deponent2&gt;Arkivbildare1;
-                </i>
-              </p>
-              <div>
-                <button
-                  onClick={() =>
-                    setShowArchiveInitiators(!showArchiveInitiators)
-                  }
-                >
-                  <b>Visa tillgängliga arkiv</b>
-                </button>
-                {showArchiveInitiators && (
-                  <Box
-                    sx={{
-                      maxHeight: 300,
-                      overflow: 'scroll',
-                      padding: 2,
-                      border: '1px solid black',
-                    }}
-                  >
-                    {showArchiveInitiators &&
-                      filterConfigs &&
-                      filterConfigs
-                        .find(
-                          (filterConfig) =>
-                            filterConfig.fieldName === 'archiveInitiator'
-                        )
-                        ?.allValues?.map((value) => (
-                          <div key={value}>
-                            <Button
-                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
-                              onClick={() => {
-                                addArchiveInitiator(value)
-                              }}
-                            >
-                              {value}
-                            </Button>
-                          </div>
-                        ))}
-                  </Box>
-                )}
-              </div>
-            </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="series"
-                label="Serier"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.series ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.series = event.target.value.replaceAll('\n', '')
-                  setEditUser(updatedUser)
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange de serier användaren ska kunna se i läsesalen. Allt
                 material för en arkivbildare som anges här kommer vara åtkomligt
-                för användaren. Ange flera volymer med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1&gt;SerieA;
-                  <br />
-                  Deponent2&gt;Arkivbildare1&gt;SerieM;
-                </i>
+                för användaren.
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
-              <TextField
-                id="volumes"
-                label="Volymer"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.volumes ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
+              <Autocomplete
+                multiple
+                options={
+                  seriesStep === 0
+                    ? selectedDepositors
+                    : seriesStep === 1
+                    ? selectedArchiveInitiators
+                    : []
+                }
+                value={seriesList}
+                onChange={(event, newValue) => {
+                  if (seriesStep === 0) {
+                    setSelectedDepositorForSeries(newValue[newValue.length - 1])
+                    setSeriesStep(1)
+                  } else if (seriesStep === 1) {
+                    setSelectedArchiveForSeries(newValue[newValue.length - 1])
+                    setSeriesStep(2)
                   }
-                  updatedUser.volumes = event.target.value.replaceAll('\n', '')
-                  setEditUser(updatedUser)
                 }}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={
+                      seriesStep === 0
+                        ? 'Välj deponent'
+                        : seriesStep === 1
+                        ? 'Välj arkiv'
+                        : 'Ange serie'
+                    }
+                    placeholder={
+                      seriesStep === 0
+                        ? 'Välj deponent...'
+                        : seriesStep === 1
+                        ? 'Välj arkiv...'
+                        : 'Ange serienamn och tryck Enter...'
+                    }
+                    onKeyDown={(e) => {
+                      if (seriesStep === 2 && e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddSeries(e.target.value)
+                      }
+                    }}
+                  />
+                )}
+                getOptionLabel={(option) => option}
                 fullWidth
+                disableCloseOnSelect
+                freeSolo={seriesStep === 2}
+                noOptionsText={
+                  seriesStep === 0
+                    ? 'Inga deponenter tillgängliga'
+                    : seriesStep === 1
+                    ? 'Inga arkiv tillgängliga'
+                    : ''
+                }
               />
             </Grid>
             <Grid item md={5} xs={12}>
               <p>
-                Ange de volymer användaren ska kunna se i läsesalen. Allt
-                material för en volym som anges här kommer vara åtkomligt för
-                användaren. Ange flera volymer med semikolon mellan. Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1&gt;SerieA&gt;Volym1;
-                  <br />
-                  Deponent2&gt;Arkivbildare1&gt;SerieM&gt;Volym5;
-                </i>
+                Ange de serier användaren ska kunna se i läsesalen. Välj först
+                en deponent och ett arkiv, skriv sedan in serienamnet. Tryck
+                Enter för att lägga till serien.
+              </p>
+            </Grid>
+            <Grid
+              item
+              md={7}
+              xs={12}
+              sx={{
+                position: 'relative',
+                border: '1px solid rgba(0, 0, 0, 0.23)',
+                borderRadius: '4px',
+                padding: '16px',
+                marginTop: '16px',
+              }}
+            >
+              <Typography
+                variant="caption"
+                component="span"
+                sx={{
+                  position: 'absolute',
+                  top: '-10px',
+                  left: '12px',
+                  backgroundColor: 'white',
+                  padding: '0 4px',
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '0.75rem',
+                }}
+              >
+                Volymer
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={5}>
+                  <Autocomplete
+                    options={seriesList}
+                    value={selectedSeriesForVolumes}
+                    onChange={(event, newValue) => {
+                      setSelectedSeriesForVolumes(newValue)
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Välj serie"
+                        placeholder="Välj serie..."
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <TextField
+                    label="Skriv in volym"
+                    placeholder="Skriv volym..."
+                    value={volumeInput}
+                    onChange={(e) => setVolumeInput(e.target.value)}
+                    disabled={!selectedSeriesForVolumes}
+                    fullWidth
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddVolume()
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+              <Box mt={2}>
+                {volumeList.map((volume, index) => (
+                  <Chip
+                    key={index}
+                    label={volume}
+                    onDelete={() => {
+                      const updatedVolumeList = volumeList.filter(
+                        (v) => v !== volume
+                      )
+                      setVolumeList(updatedVolumeList)
+                      setEditUser({
+                        ...editUser,
+                        volumes: updatedVolumeList.join(';'),
+                      })
+                    }}
+                    sx={{ margin: '2px' }}
+                  />
+                ))}
+              </Box>
+            </Grid>
+            <Grid item md={5} xs={12}>
+              <p>
+                Ange de volymer användaren ska kunna se i läsesalen. Välj först
+                en deponent, ett arkiv och en serie, skriv sedan in volymnamnet.
+                Tryck Enter för att lägga till volymen.
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
-              <TextField
-                id="fileNames"
-                label="Dokument"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.fileNames ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.fileNames = event.target.value
-                  setEditUser(updatedUser)
-                }}
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={fileNamesList}
+                onChange={handleFileNamesChange}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Lägg till dokument"
+                    placeholder="Skriv filnamn och tryck Enter..."
+                  />
+                )}
                 fullWidth
               />
             </Grid>
             <Grid item md={5} xs={12}>
               <p>
                 Ange filnamn för de dokument användaren ska kunna se i
-                läsesalen. Ange flera filnamn med semikolon mellan. Exempelvis:
-                <br />
-                <i>
-                  Filnamn1.jpg;
-                  <br />
-                  Filnamn2.pdf;
-                  <br />
-                  Filnamn10.pdf;
-                </i>
+                läsesalen. Skriv in filnamnet och tryck Enter för att lägga till
+                det.
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
@@ -468,12 +493,6 @@ export const UserEdit = () => {
                   setEditUser(updatedUser)
                 }}
               />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              Efter tre misslyckade inloggningsförsök markeras konto automatiskt
-              som låst, och kan då inte användas för inloggning.
-            </Grid>
-            <Grid item md={7} xs={12}>
               <FormControlLabel
                 control={<Checkbox id="disabled" />}
                 label="Avstängt"
@@ -488,8 +507,12 @@ export const UserEdit = () => {
               />
             </Grid>
             <Grid item md={5} xs={12}>
-              Om ett konto är låst så har det låsts manuellt av en
-              administratör.
+              <p>
+                Efter tre misslyckade inloggningsförsök markeras kontot
+                automatiskt som låst, och kan då inte användas för inloggning.
+                Om ett konto är avstängt så har det låsts manuellt av en
+                administratör.
+              </p>
             </Grid>
             <Grid item md={12} xs={12}>
               {error && <Alert severity="error">{error}</Alert>}

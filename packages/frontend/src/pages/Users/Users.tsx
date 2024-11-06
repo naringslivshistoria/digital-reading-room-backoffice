@@ -195,7 +195,7 @@ const Users = () => {
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                 <Link
                   to={`user?id=${user.id}`}
-                  state={{ user, expandedGroup, showGrid }}
+                  state={{ user, expandedGroup, showGrid, users: data?.users }}
                 >
                   <IconButton size="small" color="warning">
                     <EditIcon />

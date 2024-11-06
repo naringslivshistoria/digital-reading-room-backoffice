@@ -38,7 +38,8 @@ export const UserEdit = () => {
     location.state.user.groups || []
   )
   const expandedGroup = location.state.expandedGroup
-  console.log(location.state.user.groups)
+  const allGroups = location.state.users.map((user: User) => user.groups).flat()
+
   const addDepositor = (depositor: string) => {
     if (editUser.depositors) {
       if (editUser.depositors.indexOf(depositor) !== -1) {
@@ -161,7 +162,7 @@ export const UserEdit = () => {
               <Autocomplete
                 multiple
                 freeSolo
-                options={[]}
+                options={allGroups || []}
                 value={selectedGroups}
                 onChange={(event, newValue) =>
                   handleGroupsChange(event, newValue)

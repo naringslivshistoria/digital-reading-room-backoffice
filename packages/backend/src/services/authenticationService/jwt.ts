@@ -36,7 +36,8 @@ const getUser = async (username: string) => {
       'fileNames',
       'reset_token',
       'reset_token_expires',
-      'role'
+      'role',
+      'groups'
     )
     .from<User>('users')
     .where('username', username)

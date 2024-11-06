@@ -36,6 +36,7 @@ interface User {
   role: Role | null
   volumes: string | null
   series: string | null
+  groups: string | string[] | null
 }
 
 interface ImportLevel {

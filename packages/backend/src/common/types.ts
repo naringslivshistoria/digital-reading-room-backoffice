@@ -33,6 +33,7 @@ interface User {
   archiveInitiators: string | null
   documentIds: string | null
   role: Role | null
+  groups: string | string[] | null
 }
 
 interface ImportLevel {

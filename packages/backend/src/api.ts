@@ -19,6 +19,7 @@ router.get('(.*)/auth/is-logged-in', async (ctx) => {
       archiveInitiators: ctx.state?.user?.archiveInitiators,
       series: ctx.state?.user?.series,
       volumes: ctx.state?.user?.volumes,
+      groups: ctx.state?.user?.groups,
     }
   } else {
     ctx.status = 401

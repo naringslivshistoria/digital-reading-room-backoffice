@@ -17,11 +17,12 @@ import {
   AccordionDetails,
   Autocomplete,
   TextField,
+  TablePagination,
 } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import AppsIcon from '@mui/icons-material/Apps'
+import GroupsIcon from '@mui/icons-material/Groups'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useConfirm } from 'material-ui-confirm'
@@ -47,6 +48,8 @@ const Users = () => {
     location.state?.expandedGroup || null
   )
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const getUserStatus = (user: User): string => {
     if (user.locked) {
@@ -122,99 +125,134 @@ const Users = () => {
     setExpandedGroup(group)
   }
 
-  const renderUsersTable = (users: User[]) => (
-    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ whiteSpace: 'nowrap' }}>
-            Användarnamn (epost)
-          </TableCell>
-          <TableCell align="left">Deponenter</TableCell>
-          <TableCell align="left">Grupp</TableCell>
-          <TableCell align="left">Roll</TableCell>
-          <TableCell align="left">Status</TableCell>
-          <TableCell align="right">Åtgärder</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {users.map((user) => (
-          <TableRow
-            key={user.id}
-            sx={{
-              '&:last-child td, &:last-child th': { border: 0 },
-            }}
-          >
-            <TableCell component="th" scope="row">
-              {user.username}
-            </TableCell>
-            <TableCell align="left">
-              <Box
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  const renderUsersTable = (users: User[]) => {
+    const startIndex = page * rowsPerPage
+    const endIndex = startIndex + rowsPerPage
+    const displayedUsers = users.slice(startIndex, endIndex)
+
+    return (
+      <>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                Användarnamn (epost)
+              </TableCell>
+              <TableCell align="left">Deponenter</TableCell>
+              <TableCell align="left">Grupp</TableCell>
+              <TableCell align="left">Roll</TableCell>
+              <TableCell align="left">Status</TableCell>
+              <TableCell align="right">Åtgärder</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {displayedUsers.map((user) => (
+              <TableRow
+                key={user.id}
                 sx={{
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden',
-                  maxWidth: '350px',
-                  whiteSpace: 'nowrap',
+                  '&:last-child td, &:last-child th': { border: 0 },
                 }}
               >
-                {user.depositors}
-              </Box>
-            </TableCell>
-            <TableCell align="left" width={'25%'}>
-              <Box
-                sx={{
-                  textOverflow: 'ellipsis',
-                  maxWidth: '150px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {Array.isArray(user.groups) && user.groups.length > 0 ? (
-                    user.groups.map((group) => (
-                      <Chip
-                        key={group}
-                        label={group}
-                        variant="outlined"
-                        onClick={(e) => handleGroupClick(group, e)}
-                        sx={{ cursor: 'pointer' }}
-                      />
-                    ))
-                  ) : (
-                    <Chip
-                      label="Ogrupperade"
-                      variant="outlined"
-                      onClick={(e) => handleGroupClick('ungrouped', e)}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  )}
-                </Box>
-              </Box>
-            </TableCell>
-            <TableCell align="left">{user.role}</TableCell>
-            <TableCell align="left">{getUserStatus(user)}</TableCell>
-            <TableCell align="right">
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Link
-                  to={`user?id=${user.id}`}
-                  state={{ user, expandedGroup, showGrid, users: data?.users }}
-                >
-                  <IconButton size="small" color="warning">
-                    <EditIcon />
-                  </IconButton>
-                </Link>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => deleteUser(user)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
+                <TableCell component="th" scope="row">
+                  {user.username}
+                </TableCell>
+                <TableCell align="left">
+                  <Box
+                    sx={{
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      maxWidth: '350px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {user.depositors}
+                  </Box>
+                </TableCell>
+                <TableCell align="left" width={'25%'}>
+                  <Box
+                    sx={{
+                      textOverflow: 'ellipsis',
+                      maxWidth: '150px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      {Array.isArray(user.groups) && user.groups.length > 0 ? (
+                        user.groups.map((group) => (
+                          <Chip
+                            key={group}
+                            label={group}
+                            variant="outlined"
+                            onClick={(e) => handleGroupClick(group, e)}
+                            sx={{ cursor: 'pointer' }}
+                          />
+                        ))
+                      ) : (
+                        <Chip
+                          label="Ogrupperade"
+                          variant="outlined"
+                          onClick={(e) => handleGroupClick('ungrouped', e)}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell align="left">{user.role}</TableCell>
+                <TableCell align="left">{getUserStatus(user)}</TableCell>
+                <TableCell align="right">
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}
+                  >
+                    <Link
+                      to={`user?id=${user.id}`}
+                      state={{
+                        user,
+                        expandedGroup,
+                        showGrid,
+                        users: data?.users,
+                      }}
+                    >
+                      <IconButton size="small" color="secondary">
+                        <EditIcon />
+                      </IconButton>
+                    </Link>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => deleteUser(user)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+          component="div"
+          count={users.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Resultat per sida:"
+        />
+      </>
+    )
+  }
 
   return (
     <>
@@ -257,7 +295,7 @@ const Users = () => {
                     color: showGrid ? 'secondary.main' : '#adafaf',
                   }}
                 >
-                  <AppsIcon />
+                  <GroupsIcon />
                 </IconButton>
                 <IconButton
                   onClick={() => displayGridMode(false)}
@@ -279,6 +317,7 @@ const Users = () => {
                   },
                   showGrid,
                   expandedGroup,
+                  users: data?.users,
                 }}
               >
                 <Button variant="contained">Skapa användare</Button>

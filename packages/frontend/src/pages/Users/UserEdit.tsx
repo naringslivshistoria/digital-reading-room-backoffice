@@ -38,7 +38,9 @@ export const UserEdit = () => {
     location.state.user.groups || []
   )
   const expandedGroup = location.state.expandedGroup
-  const allGroups = location.state.users.map((user: User) => user.groups).flat()
+  const allGroups = location.state?.users
+    ?.map((user: User) => user.groups)
+    .flat()
 
   const addDepositor = (depositor: string) => {
     if (editUser.depositors) {

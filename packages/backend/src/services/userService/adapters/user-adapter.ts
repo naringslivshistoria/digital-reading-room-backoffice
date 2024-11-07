@@ -60,7 +60,6 @@ const getUser = async (id: string) => {
 }
 
 const updateUser = async (user: User) => {
-  console.log('Updating user backend', user)
   let id: string
 
   if (user.id) {

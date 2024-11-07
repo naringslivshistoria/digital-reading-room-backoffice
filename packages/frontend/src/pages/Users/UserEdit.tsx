@@ -34,7 +34,7 @@ export const UserEdit = () => {
   const [error, setError] = useState<string | null>()
   const [showDepositors, setShowDepositors] = useState(false)
   const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
-  const [selectedGroups, setSelectedGroups] = useState<string[] | null>(
+  const [selectedGroups, setSelectedGroups] = useState<string[] | undefined>(
     location.state.user.groups || []
   )
   const expandedGroup = location.state.expandedGroup

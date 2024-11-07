@@ -120,6 +120,38 @@ const mdTheme = createTheme({
         },
       },
     },
+    MuiTablePagination: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        toolbar: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        selectLabel: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        select: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        displayedRows: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        actions: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+        input: {
+          fontFamily: 'centraleSans',
+          fontSize: 16,
+        },
+      },
+    },
   },
 })
 

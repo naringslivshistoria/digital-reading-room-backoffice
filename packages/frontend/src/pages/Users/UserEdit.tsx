@@ -21,8 +21,10 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
-import { Role, User } from '../../common/types'
+import { Role, User, UserFormState } from '../../common/types'
 import { useFieldValues } from './hooks/useFilters'
+import { ItemSelector } from './components/ItemSelector'
+import { ItemList } from './components/ItemList'
 
 export const UserEdit = () => {
   useIsLoggedIn()
@@ -128,7 +130,6 @@ export const UserEdit = () => {
           <Typography variant="h2">Administrera användare</Typography>
           <Grid
             container
-            //Spacing y
             columnSpacing={4}
             rowSpacing={4}
             sx={{ marginTop: 0, marginBottom: '40px' }}
@@ -245,37 +246,26 @@ export const UserEdit = () => {
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
-              <Autocomplete
-                multiple
-                options={
-                  filterConfigs?.find(
-                    (filterConfig) =>
-                      filterConfig.fieldName === 'archiveInitiator'
-                  )?.allValues || []
+              <ItemSelector
+                depositorValue={formState.archiveInitiators.depositor}
+                onDepositorChange={(value) =>
+                  handleFormChange('archiveInitiators', 'depositor', value)
                 }
-                value={selectedArchiveInitiators}
-                onChange={(event, newValue) =>
-                  handleArchiveInitiatorsChange(event, newValue)
+                archiveValue={formState.archiveInitiators.archive}
+                onArchiveChange={(value) =>
+                  handleFormChange('archiveInitiators', 'archive', value)
                 }
-                renderTags={(value: readonly string[], getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
-                    />
-                  ))
+                depositorOptions={depositorOptions}
+                archiveOptions={archiveOptions}
+                onAdd={() => handleAddItem('archiveInitiators')}
+                disabled={
+                  !formState.archiveInitiators.depositor ||
+                  !formState.archiveInitiators.archive
                 }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Lägg till arkiv genom att söka och klicka"
-                    placeholder="Sök arkiv..."
-                  />
-                )}
-                fullWidth
-                disableCloseOnSelect
-                noOptionsText="Inga arkiv hittades"
+              />
+              <ItemList
+                items={formState.selectedItems.archiveInitiators}
+                onDelete={(item) => handleRemoveItem('archiveInitiators', item)}
               />
             </Grid>
             <Grid item md={5} xs={12}>
@@ -286,70 +276,32 @@ export const UserEdit = () => {
               </p>
             </Grid>
             <Grid item md={7} xs={12}>
-              <Autocomplete
-                multiple
-                options={
-                  seriesStep === 0
-                    ? selectedDepositors
-                    : seriesStep === 1
-                    ? selectedArchiveInitiators
-                    : []
+              <ItemSelector
+                depositorValue={formState.series.depositor}
+                onDepositorChange={(value) =>
+                  handleFormChange('series', 'depositor', value)
                 }
-                value={seriesList}
-                onChange={(event, newValue) => {
-                  if (seriesStep === 0) {
-                    setSelectedDepositorForSeries(newValue[newValue.length - 1])
-                    setSeriesStep(1)
-                  } else if (seriesStep === 1) {
-                    setSelectedArchiveForSeries(newValue[newValue.length - 1])
-                    setSeriesStep(2)
-                  }
-                }}
-                renderTags={(value: readonly string[], getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
-                    />
-                  ))
+                archiveValue={formState.series.archive}
+                onArchiveChange={(value) =>
+                  handleFormChange('series', 'archive', value)
                 }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={
-                      seriesStep === 0
-                        ? 'Välj deponent'
-                        : seriesStep === 1
-                        ? 'Välj arkiv'
-                        : 'Ange serie'
-                    }
-                    placeholder={
-                      seriesStep === 0
-                        ? 'Välj deponent...'
-                        : seriesStep === 1
-                        ? 'Välj arkiv...'
-                        : 'Ange serienamn och tryck Enter...'
-                    }
-                    onKeyDown={(e) => {
-                      if (seriesStep === 2 && e.key === 'Enter') {
-                        e.preventDefault()
-                        handleAddSeries(e.target.value)
-                      }
-                    }}
-                  />
-                )}
-                getOptionLabel={(option) => option}
-                fullWidth
-                disableCloseOnSelect
-                freeSolo={seriesStep === 2}
-                noOptionsText={
-                  seriesStep === 0
-                    ? 'Inga deponenter tillgängliga'
-                    : seriesStep === 1
-                    ? 'Inga arkiv tillgängliga'
-                    : ''
+                seriesValue={formState.series.series}
+                onSeriesChange={(value) =>
+                  handleFormChange('series', 'series', value)
                 }
+                seriesOptions={seriesOptions}
+                depositorOptions={depositorOptions}
+                archiveOptions={archiveOptions}
+                onAdd={() => handleAddItem('series')}
+                disabled={
+                  !formState.series.depositor ||
+                  !formState.series.archive ||
+                  !formState.series.series
+                }
+              />
+              <ItemList
+                items={formState.selectedItems.series}
+                onDelete={(item) => handleRemoveItem('series', item)}
               />
             </Grid>
             <Grid item md={5} xs={12}>
@@ -359,86 +311,40 @@ export const UserEdit = () => {
                 Enter för att lägga till serien.
               </p>
             </Grid>
-            <Grid
-              item
-              md={7}
-              xs={12}
-              sx={{
-                position: 'relative',
-                border: '1px solid rgba(0, 0, 0, 0.23)',
-                borderRadius: '4px',
-                padding: '16px',
-                marginTop: '16px',
-              }}
-            >
-              <Typography
-                variant="caption"
-                component="span"
-                sx={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  backgroundColor: 'white',
-                  padding: '0 4px',
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  fontSize: '0.75rem',
-                }}
-              >
-                Volymer
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={5}>
-                  <Autocomplete
-                    options={seriesList}
-                    value={selectedSeriesForVolumes}
-                    onChange={(event, newValue) => {
-                      setSelectedSeriesForVolumes(newValue)
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Välj serie"
-                        placeholder="Välj serie..."
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <TextField
-                    label="Skriv in volym"
-                    placeholder="Skriv volym..."
-                    value={volumeInput}
-                    onChange={(e) => setVolumeInput(e.target.value)}
-                    disabled={!selectedSeriesForVolumes}
-                    fullWidth
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        handleAddVolume()
-                      }
-                    }}
-                  />
-                </Grid>
-              </Grid>
-              <Box mt={2}>
-                {volumeList.map((volume, index) => (
-                  <Chip
-                    key={index}
-                    label={volume}
-                    onDelete={() => {
-                      const updatedVolumeList = volumeList.filter(
-                        (v) => v !== volume
-                      )
-                      setVolumeList(updatedVolumeList)
-                      setEditUser({
-                        ...editUser,
-                        volumes: updatedVolumeList.join(';'),
-                      })
-                    }}
-                    sx={{ margin: '2px' }}
-                  />
-                ))}
-              </Box>
+            <Grid item md={7} xs={12}>
+              <ItemSelector
+                depositorValue={formState.volumes.depositor}
+                onDepositorChange={(value) =>
+                  handleFormChange('volumes', 'depositor', value)
+                }
+                archiveValue={formState.volumes.archive}
+                onArchiveChange={(value) =>
+                  handleFormChange('volumes', 'archive', value)
+                }
+                depositorOptions={depositorOptions}
+                archiveOptions={archiveOptions}
+                seriesValue={formState.volumes.series}
+                onSeriesChange={(value) =>
+                  handleFormChange('volumes', 'series', value)
+                }
+                seriesOptions={seriesOptions}
+                volumeValue={formState.volumes.volume}
+                onVolumeChange={(value) =>
+                  handleFormChange('volumes', 'volume', value)
+                }
+                volumeOptions={volumeOptions}
+                onAdd={() => handleAddItem('volumes')}
+                disabled={
+                  !formState.volumes.depositor ||
+                  !formState.volumes.archive ||
+                  !formState.volumes.series ||
+                  !formState.volumes.volume
+                }
+              />
+              <ItemList
+                items={formState.selectedItems.volumes}
+                onDelete={(item) => handleRemoveItem('volumes', item)}
+              />
             </Grid>
             <Grid item md={5} xs={12}>
               <p>
@@ -452,8 +358,8 @@ export const UserEdit = () => {
                 multiple
                 freeSolo
                 options={[]}
-                value={fileNamesList}
-                onChange={handleFileNamesChange}
+                value={formState.selectedItems.fileNames}
+                onChange={(event, newValue) => handleFileNamesChange(newValue)}
                 renderTags={(value: readonly string[], getTagProps) =>
                   value.map((option, index) => (
                     <Chip

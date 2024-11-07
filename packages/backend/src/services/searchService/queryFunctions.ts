@@ -21,8 +21,6 @@ const getFullFieldName = (fieldName: string) => {
   switch (fieldName) {
     case 'pageType':
       return `pages.${fieldName}.keyword`
-    case 'volume':
-      return `fields.${fieldName}.value`
     default:
       return `fields.${fieldName}.value.keyword`
   }

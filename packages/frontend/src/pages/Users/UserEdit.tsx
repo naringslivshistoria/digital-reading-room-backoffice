@@ -91,7 +91,14 @@ export const UserEdit = () => {
     if (editUser) {
       setError(null)
       try {
-        await updateUser.mutateAsync(editUser)
+        const userToSave = {
+          ...editUser,
+          groups:
+            typeof editUser.groups === 'string'
+              ? editUser.groups
+              : JSON.stringify(editUser.groups),
+        }
+        await updateUser.mutateAsync(userToSave)
         navigate('/users')
       } catch (axiosError: any) {
         setError(axiosError.response.data.error)
@@ -207,7 +214,7 @@ export const UserEdit = () => {
               />
             </Grid>
             <Grid item md={5} xs={12}>
-              Grupper som användaren tillhör.
+              Grupper som användaren tillhör. Tryck enter för att spara.
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField

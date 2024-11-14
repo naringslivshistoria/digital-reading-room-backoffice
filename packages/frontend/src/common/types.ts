@@ -87,6 +87,7 @@ interface UserTableProps {
   deleteUser: (user: User) => void
   showGrid: boolean
   expandedGroup: string | null
+  allGroups: string[]
 }
 
 interface UserToolbarProps {
@@ -94,7 +95,7 @@ interface UserToolbarProps {
   searchQuery: string
   onSearchChange: (value: string) => void
   onDisplayModeChange: (grid: boolean) => void
-  users?: User[]
+  allGroups: string[]
 }
 
 export type {

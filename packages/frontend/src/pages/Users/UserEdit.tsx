@@ -34,13 +34,24 @@ export const UserEdit = () => {
   const [error, setError] = useState<string | null>()
   const [showDepositors, setShowDepositors] = useState(false)
   const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
-  const [selectedGroups, setSelectedGroups] = useState<string[] | undefined>(
-    location.state.user.groups || []
-  )
+  const allGroups = location.state.allGroups
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
+    const userGroups = location.state.user.groups
+    if (!userGroups) {
+      return []
+    }
+
+    if (typeof userGroups === 'string') {
+      try {
+        return JSON.parse(userGroups)
+      } catch {
+        return []
+      }
+    }
+
+    return Array.isArray(userGroups) ? userGroups : []
+  })
   const expandedGroup = location.state.expandedGroup
-  const allGroups = Array.from(
-    new Set(location.state?.users?.map((user: User) => user.groups).flat())
-  )
 
   const addDepositor = (depositor: string) => {
     if (editUser.depositors) {

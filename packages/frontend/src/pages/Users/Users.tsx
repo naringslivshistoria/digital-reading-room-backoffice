@@ -37,6 +37,25 @@ const Users = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [pageByGroup, setPageByGroup] = useState<{ [key: string]: number }>({})
+  const allGroups =
+    data?.users?.reduce((acc: string[], user: User) => {
+      if (!user.groups) {
+        return acc
+      }
+
+      let groups: string[] = []
+      if (typeof user.groups === 'string') {
+        try {
+          groups = JSON.parse(user.groups)
+        } catch {
+          return acc
+        }
+      } else if (Array.isArray(user.groups)) {
+        groups = user.groups
+      }
+
+      return [...new Set([...acc, ...groups])]
+    }, []) || []
 
   const availableColumns: ColumnConfig[] = [
     { id: 'username', label: 'Användarnamn (epost)' },
@@ -149,7 +168,7 @@ const Users = () => {
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
             onDisplayModeChange={setShowGrid}
-            users={data?.users}
+            allGroups={allGroups}
           />
 
           <Typography variant="body2">
@@ -234,6 +253,7 @@ const Users = () => {
                               deleteUser={deleteUser}
                               showGrid={showGrid}
                               expandedGroup={expandedGroup}
+                              allGroups={allGroups}
                             />
                           </AccordionDetails>
                         </Accordion>

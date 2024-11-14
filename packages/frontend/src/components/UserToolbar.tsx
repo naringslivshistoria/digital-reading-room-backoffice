@@ -17,7 +17,7 @@ const UserToolbar = ({
   searchQuery,
   onSearchChange,
   onDisplayModeChange,
-  users,
+  allGroups,
 }: UserToolbarProps) => {
   return (
     <Box
@@ -71,7 +71,7 @@ const UserToolbar = ({
               depositors:
                 'Centrum för Näringslivshistoria;Föreningen Stockholms Företagsminnen',
             },
-            users,
+            allGroups,
           }}
         >
           <Button variant="contained">Skapa användare</Button>

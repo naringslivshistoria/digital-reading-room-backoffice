@@ -28,6 +28,7 @@ const UserTable = ({
   deleteUser,
   showGrid,
   expandedGroup,
+  allGroups,
 }: UserTableProps) => {
   const currentPage = group ? pageByGroup?.[group] || 0 : page
   const startIndex = currentPage * rowsPerPage
@@ -99,7 +100,7 @@ const UserTable = ({
                 >
                   <Link
                     to={`user?id=${user.id}`}
-                    state={{ user, showGrid, expandedGroup, users }}
+                    state={{ user, showGrid, expandedGroup, allGroups }}
                   >
                     <IconButton size="small" color="secondary">
                       <EditIcon />

@@ -187,6 +187,7 @@ export const UserEdit = () => {
                 }}
                 renderTags={(value: readonly string[], getTagProps) =>
                   value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
                     <Chip
                       variant="outlined"
                       label={option}

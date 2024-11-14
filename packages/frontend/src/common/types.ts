@@ -72,6 +72,7 @@ type ColumnConfig = {
   label: string
   align?: 'left' | 'right'
   minWidth?: number
+  hideOnMobile?: boolean
 }
 
 interface UserTableProps {

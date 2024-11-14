@@ -62,8 +62,8 @@ const Users = () => {
     { id: 'depositors', label: 'Deponenter' },
     { id: 'groups', label: 'Grupp' },
     { id: 'role', label: 'Roll' },
-    { id: 'locked', label: 'Låst' },
-    { id: 'disabled', label: 'Avaktiverad' },
+    { id: 'locked', label: 'Låst', hideOnMobile: true },
+    { id: 'disabled', label: 'Avaktiverad', hideOnMobile: true },
   ]
 
   const deleteUser = async (user: User) => {

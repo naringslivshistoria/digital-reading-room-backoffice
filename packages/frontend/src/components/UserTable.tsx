@@ -12,6 +12,7 @@ import {
 import { Link } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { useTheme, useMediaQuery } from '@mui/material'
 
 import { UserTableProps } from '../common/types'
 
@@ -34,13 +35,18 @@ const UserTable = ({
   const startIndex = currentPage * rowsPerPage
   const endIndex = startIndex + rowsPerPage
   const displayedUsers = users.slice(startIndex, endIndex)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'))
+  const visibleColumns = availableColumns.filter(
+    (column) => !isMobile || !column.hideOnMobile
+  )
 
   return (
     <>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            {availableColumns.map((column) => (
+            {visibleColumns.map((column) => (
               <TableCell
                 key={column.id}
                 align={column.align || 'left'}
@@ -60,7 +66,7 @@ const UserTable = ({
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
-              {availableColumns.map((column) => (
+              {visibleColumns.map((column) => (
                 <TableCell key={column.id} align={column.align || 'left'}>
                   {column.id === 'groups' ? (
                     <Box sx={{ display: 'flex', gap: 1 }}>

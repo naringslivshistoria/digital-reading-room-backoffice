@@ -99,7 +99,7 @@ const UserTable = ({
                 >
                   <Link
                     to={`user?id=${user.id}`}
-                    state={{ user, showGrid, expandedGroup }}
+                    state={{ user, showGrid, expandedGroup, users }}
                   >
                     <IconButton size="small" color="secondary">
                       <EditIcon />

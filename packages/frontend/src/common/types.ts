@@ -36,6 +36,7 @@ interface User {
   role: Role | null
   volumes: string | null
   series: string | null
+  groups: string | string[] | null
 }
 
 interface ImportLevel {
@@ -66,4 +67,46 @@ export enum Role {
   User = 'User',
 }
 
-export type { Document, Field, Fields, Import, ImportLevel, User }
+type ColumnConfig = {
+  id: keyof User
+  label: string
+  align?: 'left' | 'right'
+  minWidth?: number
+  hideOnMobile?: boolean
+}
+
+interface UserTableProps {
+  users: User[]
+  availableColumns: ColumnConfig[]
+  page: number
+  rowsPerPage: number
+  group?: string
+  pageByGroup?: { [key: string]: number }
+  handleGroupClick: (group: string, event: React.MouseEvent) => void
+  handleChangePage: (event: unknown, newPage: number) => void
+  handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void
+  deleteUser: (user: User) => void
+  showGrid: boolean
+  expandedGroup: string | null
+  allGroups: string[]
+}
+
+interface UserToolbarProps {
+  showGrid: boolean
+  searchQuery: string
+  onSearchChange: (value: string) => void
+  onDisplayModeChange: (grid: boolean) => void
+  allGroups: string[]
+}
+
+export type {
+  Document,
+  Field,
+  Fields,
+  Import,
+  ImportLevel,
+  User,
+  ColumnConfig,
+  UserTableProps,
+  UserToolbarProps,
+}

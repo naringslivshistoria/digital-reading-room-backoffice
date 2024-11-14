@@ -12,6 +12,8 @@ import {
   Select,
   TextField,
   Typography,
+  Autocomplete,
+  Chip,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -32,6 +34,24 @@ export const UserEdit = () => {
   const [error, setError] = useState<string | null>()
   const [showDepositors, setShowDepositors] = useState(false)
   const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
+  const allGroups = location.state.allGroups
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
+    const userGroups = location.state.user.groups
+    if (!userGroups) {
+      return []
+    }
+
+    if (typeof userGroups === 'string') {
+      try {
+        return JSON.parse(userGroups)
+      } catch {
+        return []
+      }
+    }
+
+    return Array.isArray(userGroups) ? userGroups : []
+  })
+  const expandedGroup = location.state.expandedGroup
 
   const addDepositor = (depositor: string) => {
     if (editUser.depositors) {
@@ -71,7 +91,14 @@ export const UserEdit = () => {
     if (editUser) {
       setError(null)
       try {
-        await updateUser.mutateAsync(editUser)
+        const userToSave = {
+          ...editUser,
+          groups:
+            typeof editUser.groups === 'string'
+              ? editUser.groups
+              : JSON.stringify(editUser.groups),
+        }
+        await updateUser.mutateAsync(userToSave)
         navigate('/users')
       } catch (axiosError: any) {
         setError(axiosError.response.data.error)
@@ -79,12 +106,25 @@ export const UserEdit = () => {
     }
   }
 
+  const handleGroupsChange = (event: any, newValue: string[]) => {
+    const validGroups = newValue
+      .filter((group) => typeof group === 'string' && group.trim().length > 0)
+      .map((group) => group.trim())
+    setSelectedGroups(validGroups)
+    const updatedUser = { ...editUser }
+    updatedUser.groups = JSON.stringify(validGroups)
+    setEditUser(updatedUser)
+  }
+
   return (
     editUser && (
       <>
         <Grid item md={10} xs={10}>
           <Box sx={{ marginTop: 3, marginBottom: 2 }}>
-            <Link to="/users">
+            <Link
+              to="/users"
+              state={{ expandedGroup, showGrid: location.state.showGrid }}
+            >
               <ChevronLeftIcon sx={{ marginTop: '-2px' }} /> Användare
             </Link>
           </Box>
@@ -137,6 +177,44 @@ export const UserEdit = () => {
             <Grid item md={5} xs={12}>
               Användare av typen Administratör kan både logga in i backoffice
               och i läsesalen. Vanliga användare kan bara logga in i läsesalen.
+            </Grid>
+            <Grid item md={7} xs={12}>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={allGroups || []}
+                value={selectedGroups}
+                onChange={(event, newValue) =>
+                  handleGroupsChange(event, newValue)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                  }
+                }}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Skriv in grupper och tryck Enter"
+                    placeholder="Skriv grupp..."
+                  />
+                )}
+                fullWidth
+                noOptionsText="Skriv in grupp och tryck Enter"
+              />
+            </Grid>
+            <Grid item md={5} xs={12}>
+              Grupper som användaren tillhör. Tryck enter för att spara.
             </Grid>
             <Grid item md={7} xs={12}>
               <TextField

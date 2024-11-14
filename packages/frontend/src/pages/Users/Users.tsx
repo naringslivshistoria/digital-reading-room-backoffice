@@ -1,45 +1,70 @@
 import {
   Box,
-  Button,
   Grid,
   Paper,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
+  TableContainer,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material'
-import { Link } from 'react-router-dom'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useConfirm } from 'material-ui-confirm'
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUsers } from './hooks/useUsers'
-import { User } from '../../common/types'
+import { User, ColumnConfig } from '../../common/types'
 import { useDeleteUser } from './hooks/useUser'
+import UserToolbar from '../../components/UserToolbar'
+import UserTable from '../../components/UserTable'
 
 const Users = () => {
   useIsLoggedIn()
-
   const { data: data, isLoading: isLoading } = useUsers()
   const confirm = useConfirm()
   const deleteUserMutation = useDeleteUser()
+  const location = useLocation()
+  const [showGrid, setShowGrid] = useState<boolean>(
+    location.state?.showGrid ?? true
+  )
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(
+    location.state?.expandedGroup || null
+  )
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [pageByGroup, setPageByGroup] = useState<{ [key: string]: number }>({})
+  const allGroups =
+    data?.users?.reduce((acc: string[], user: User) => {
+      if (!user.groups) {
+        return acc
+      }
 
-  const getUserStatus = (user: User): string => {
-    if (user.locked) {
-      return 'Låst'
-    }
+      let groups: string[] = []
+      if (typeof user.groups === 'string') {
+        try {
+          groups = JSON.parse(user.groups)
+        } catch {
+          return acc
+        }
+      } else if (Array.isArray(user.groups)) {
+        groups = user.groups
+      }
 
-    if (user.disabled) {
-      return 'Avaktiverat'
-    }
+      return [...new Set([...acc, ...groups])]
+    }, []) || []
 
-    return 'Aktivt'
-  }
+  const availableColumns: ColumnConfig[] = [
+    { id: 'username', label: 'Användarnamn (epost)' },
+    { id: 'depositors', label: 'Deponenter' },
+    { id: 'groups', label: 'Grupp' },
+    { id: 'role', label: 'Roll' },
+    { id: 'locked', label: 'Låst', hideOnMobile: true },
+    { id: 'disabled', label: 'Avaktiverad', hideOnMobile: true },
+  ]
 
   const deleteUser = async (user: User) => {
     try {
@@ -56,6 +81,78 @@ const Users = () => {
     }
   }
 
+  const filterUsers = (users: User[]) => {
+    if (!searchQuery) return users
+
+    return users.filter(
+      (user) =>
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.depositors?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }
+
+  const groupUsersByGroup = (users: User[]) => {
+    const filteredUsers = filterUsers(users)
+    const groupedUsers: { [key: string]: User[] } = {
+      ungrouped: [],
+    }
+
+    filteredUsers.forEach((user) => {
+      if (!Array.isArray(user.groups) || user.groups.length === 0) {
+        groupedUsers['ungrouped'].push(user)
+      } else {
+        user.groups.forEach((group) => {
+          if (!groupedUsers[group]) {
+            groupedUsers[group] = []
+          }
+          groupedUsers[group].push(user)
+        })
+      }
+    })
+
+    if (groupedUsers['ungrouped'].length === 0) {
+      delete groupedUsers['ungrouped']
+    }
+
+    return groupedUsers
+  }
+
+  const handleGroupClick = (group: string, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setShowGrid(true)
+    setExpandedGroup(group)
+    setPageByGroup((prev) => ({
+      ...prev,
+      [group]: 0,
+    }))
+    setPage(0)
+  }
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    if (showGrid && expandedGroup) {
+      setPageByGroup((prev) => ({
+        ...prev,
+        [expandedGroup]: newPage,
+      }))
+    } else {
+      setPage(newPage)
+    }
+  }
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  const handleSearchChange = (newValue: string) => {
+    setSearchQuery(newValue)
+    setPage(0)
+    setPageByGroup({})
+  }
+
   return (
     <>
       <Grid item md={10} xs={10} sx={{ paddingTop: 10 }}>
@@ -66,96 +163,127 @@ const Users = () => {
           display={'block'}
           sx={{ marginBottom: '40px' }}
         >
-          <Typography variant="h2">Administrera användare</Typography>
-          <Typography variant="body2" sx={{ marginTop: 1 }}>
+          <UserToolbar
+            showGrid={showGrid}
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            onDisplayModeChange={setShowGrid}
+            allGroups={allGroups}
+          />
+
+          <Typography variant="body2">
             {data == null && isLoading
               ? 'Användarna hämtas...'
               : data == null && !isLoading
               ? 'Inga användare hittades'
               : ''}
           </Typography>
-          <Link
-            to="user"
-            state={{
-              user: {
-                username: '',
-                role: 'User',
-                depositors:
-                  'Centrum för Näringslivshistoria;Föreningen Stockholms Företagsminnen',
-              },
-            }}
-          >
-            <Button variant="contained">Skapa användare</Button>
-          </Link>
 
           {data != null && data?.users != null && (
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                      Användarnamn (epost)
-                    </TableCell>
-                    <TableCell align="left">Deponenter</TableCell>
-                    <TableCell align="left">Arkiv</TableCell>
-                    <TableCell align="left">Roll</TableCell>
-                    <TableCell align="left">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.users.map((user) => (
-                    <TableRow
-                      key={user.id}
-                      sx={{
-                        '&:last-child td, &:last-child th': { border: 0 },
-                        '&:hover': { backgroundColor: 'lightgray' },
-                      }}
-                    >
-                      <TableCell component="th" scope="row">
-                        <Link to={`user?id=${user.id}`} state={{ user }}>
-                          <EditIcon /> {user.username}
-                        </Link>
-                      </TableCell>
-                      <TableCell align="left">
-                        <Box
+            <>
+              {filterUsers(data.users).length === 0 ? (
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Typography variant="body1" color="text.secondary">
+                    Inga användare matchade din sökning
+                  </Typography>
+                </Box>
+              ) : showGrid ? (
+                <Box sx={{ mt: 2 }}>
+                  <TableContainer
+                    component={Paper}
+                    sx={{
+                      boxShadow: 2,
+                    }}
+                  >
+                    {Object.entries(groupUsersByGroup(data.users)).map(
+                      ([group, users]) => (
+                        <Accordion
+                          key={group}
+                          expanded={expandedGroup === group}
+                          onChange={() =>
+                            setExpandedGroup(
+                              expandedGroup === group ? null : group
+                            )
+                          }
                           sx={{
-                            textOverflow: 'ellipsis',
-                            overflow: 'hidden',
-                            maxWidth: '350px',
-                            whiteSpace: 'nowrap',
+                            margin: '0 !important',
                           }}
                         >
-                          {user.depositors}
-                        </Box>
-                      </TableCell>
-                      <TableCell align="left" width={'25%'}>
-                        <Box
-                          sx={{
-                            textOverflow: 'ellipsis',
-                            overflow: 'hidden',
-                            maxWidth: '150px',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {user.archiveInitiators}
-                        </Box>
-                      </TableCell>
-                      <TableCell align="left">{user.role}</TableCell>
-                      <TableCell align="left">
-                        {getUserStatus(user)}{' '}
-                        <Button
-                          onClick={() => {
-                            deleteUser(user)
-                          }}
-                        >
-                          <DeleteIcon />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                          <AccordionSummary
+                            expandIcon={
+                              <ExpandMoreIcon
+                                sx={{
+                                  color:
+                                    expandedGroup === group
+                                      ? 'primary.contrastText'
+                                      : 'inherit',
+                                  '.MuiAccordionSummary-root:hover &': {
+                                    color: 'primary.contrastText',
+                                  },
+                                }}
+                              />
+                            }
+                            sx={{
+                              '&:hover': {
+                                backgroundColor: 'primary.main',
+                                color: 'primary.contrastText',
+                              },
+                              '&.Mui-expanded': {
+                                backgroundColor: 'primary.main',
+                                color: 'primary.contrastText',
+                              },
+                            }}
+                          >
+                            <Typography variant="subtitle1">
+                              {group === 'ungrouped' ? 'Ogrupperade' : group} (
+                              {users.length} användare)
+                            </Typography>
+                          </AccordionSummary>
+                          <AccordionDetails sx={{ padding: 0 }}>
+                            <UserTable
+                              users={users}
+                              availableColumns={availableColumns}
+                              page={page}
+                              rowsPerPage={rowsPerPage}
+                              group={group}
+                              pageByGroup={pageByGroup}
+                              handleGroupClick={handleGroupClick}
+                              handleChangePage={handleChangePage}
+                              handleChangeRowsPerPage={handleChangeRowsPerPage}
+                              deleteUser={deleteUser}
+                              showGrid={showGrid}
+                              expandedGroup={expandedGroup}
+                              allGroups={allGroups}
+                            />
+                          </AccordionDetails>
+                        </Accordion>
+                      )
+                    )}
+                  </TableContainer>
+                </Box>
+              ) : (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: 2,
+                    mt: 2,
+                  }}
+                >
+                  <UserTable
+                    users={filterUsers(data.users)}
+                    availableColumns={availableColumns}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    handleGroupClick={handleGroupClick}
+                    handleChangePage={handleChangePage}
+                    handleChangeRowsPerPage={handleChangeRowsPerPage}
+                    deleteUser={deleteUser}
+                    showGrid={showGrid}
+                    expandedGroup={expandedGroup}
+                  />
+                </TableContainer>
+              )}
+            </>
           )}
         </Stack>
       </Grid>

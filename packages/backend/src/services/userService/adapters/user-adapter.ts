@@ -29,7 +29,8 @@ const getUsers = async () => {
       'fileNames',
       'series',
       'volumes',
-      'role'
+      'role',
+      'groups'
     )
     .from<User>('users')
     .orderBy('username')
@@ -50,7 +51,8 @@ const getUser = async (id: string) => {
       'fileNames',
       'series',
       'volumes',
-      'role'
+      'role',
+      'groups'
     )
     .from<User>('users')
     .where('id', id)

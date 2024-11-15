@@ -280,6 +280,7 @@ const Users = () => {
                     deleteUser={deleteUser}
                     showGrid={showGrid}
                     expandedGroup={expandedGroup}
+                    allGroups={allGroups}
                   />
                 </TableContainer>
               )}

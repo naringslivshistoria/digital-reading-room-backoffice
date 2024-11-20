@@ -21,7 +21,7 @@ export const ItemList = ({ items, onDelete }: ItemListProps) => {
           {items.map((item) => (
             <TableRow key={item}>
               <TableCell>{item}</TableCell>
-              <TableCell align="right" sx={{ width: 50 }}>
+              <TableCell align="right">
                 <IconButton
                   onClick={() => onDelete(item)}
                   size="small"

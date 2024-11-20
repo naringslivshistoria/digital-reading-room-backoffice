@@ -140,13 +140,9 @@ export const UserEdit = () => {
                 label="Användarnamn (epostadress)"
                 variant="outlined"
                 value={editUser.username}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.username = event.target.value
-                  setEditUser(updatedUser)
-                }}
+                onChange={(event) =>
+                  setEditUser({ ...editUser, username: event.target.value })
+                }
                 fullWidth
               />
             </Grid>
@@ -160,13 +156,12 @@ export const UserEdit = () => {
                   labelId="role-label"
                   label="Användartyp"
                   value={editUser.role}
-                  onChange={(event) => {
-                    const updatedUser = {
+                  onChange={(event) =>
+                    setEditUser({
                       ...editUser,
-                    }
-                    updatedUser.role = event.target.value as Role
-                    setEditUser(updatedUser)
-                  }}
+                      role: event.target.value as Role,
+                    })
+                  }
                 >
                   <MenuItem value="User">Standard</MenuItem>
                   <MenuItem value="Admin">Administratör</MenuItem>
@@ -198,6 +193,7 @@ export const UserEdit = () => {
                       variant="outlined"
                       label={option}
                       {...getTagProps({ index })}
+                      onDelete={() => handleRemoveItem('depositors', option)}
                     />
                   ))
                 }
@@ -289,9 +285,9 @@ export const UserEdit = () => {
                 onSeriesChange={(value) =>
                   handleFormChange('series', 'series', value)
                 }
-                seriesOptions={seriesOptions}
                 depositorOptions={depositorOptions}
                 archiveOptions={archiveOptions}
+                seriesOptions={seriesOptions}
                 onAdd={() => handleAddItem('series')}
                 disabled={
                   !formState.series.depositor ||
@@ -321,17 +317,17 @@ export const UserEdit = () => {
                 onArchiveChange={(value) =>
                   handleFormChange('volumes', 'archive', value)
                 }
-                depositorOptions={depositorOptions}
-                archiveOptions={archiveOptions}
                 seriesValue={formState.volumes.series}
                 onSeriesChange={(value) =>
                   handleFormChange('volumes', 'series', value)
                 }
-                seriesOptions={seriesOptions}
                 volumeValue={formState.volumes.volume}
                 onVolumeChange={(value) =>
                   handleFormChange('volumes', 'volume', value)
                 }
+                depositorOptions={depositorOptions}
+                archiveOptions={archiveOptions}
+                seriesOptions={seriesOptions}
                 volumeOptions={volumeOptions}
                 onAdd={() => handleAddItem('volumes')}
                 disabled={
@@ -362,6 +358,7 @@ export const UserEdit = () => {
                 onChange={(event, newValue) => handleFileNamesChange(newValue)}
                 renderTags={(value: readonly string[], getTagProps) =>
                   value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
                     <Chip
                       variant="outlined"
                       label={option}
@@ -391,25 +388,17 @@ export const UserEdit = () => {
                 control={<Checkbox id="locked" />}
                 label="Låst"
                 checked={editUser.locked}
-                onChange={(event, checked: boolean) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.locked = checked
-                  setEditUser(updatedUser)
-                }}
+                onChange={(event, checked: boolean) =>
+                  setEditUser({ ...editUser, locked: checked })
+                }
               />
               <FormControlLabel
                 control={<Checkbox id="disabled" />}
                 label="Avstängt"
                 checked={editUser.disabled}
-                onChange={(event, checked: boolean) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.disabled = checked
-                  setEditUser(updatedUser)
-                }}
+                onChange={(event, checked: boolean) =>
+                  setEditUser({ ...editUser, disabled: checked })
+                }
               />
             </Grid>
             <Grid item md={5} xs={12}>

@@ -28,7 +28,6 @@ import { ItemList } from './components/ItemList'
 
 export const UserEdit = () => {
   useIsLoggedIn()
-  const { data: filterConfigs } = useFieldValues({ filter: null })
   const location = useLocation()
   const navigate = useNavigate()
   const updateUser = useUpdateUser()
@@ -252,7 +251,7 @@ export const UserEdit = () => {
                   handleFormChange('archiveInitiators', 'archive', value)
                 }
                 depositorOptions={depositorOptions}
-                archiveOptions={archiveOptions}
+                archiveOptions={archiveOptionsForArchiveInitiators}
                 onAdd={() => handleAddItem('archiveInitiators')}
                 disabled={
                   !formState.archiveInitiators.depositor ||
@@ -286,8 +285,8 @@ export const UserEdit = () => {
                   handleFormChange('series', 'series', value)
                 }
                 depositorOptions={depositorOptions}
-                archiveOptions={archiveOptions}
-                seriesOptions={seriesOptions}
+                archiveOptions={archiveOptionsForSeries}
+                seriesOptions={seriesOptionsForSeries}
                 onAdd={() => handleAddItem('series')}
                 disabled={
                   !formState.series.depositor ||
@@ -326,9 +325,9 @@ export const UserEdit = () => {
                   handleFormChange('volumes', 'volume', value)
                 }
                 depositorOptions={depositorOptions}
-                archiveOptions={archiveOptions}
-                seriesOptions={seriesOptions}
-                volumeOptions={volumeOptions}
+                archiveOptions={archiveOptionsForVolumes}
+                seriesOptions={seriesOptionsForVolumes}
+                volumeOptions={volumeOptionsForVolumes}
                 onAdd={() => handleAddItem('volumes')}
                 disabled={
                   !formState.volumes.depositor ||

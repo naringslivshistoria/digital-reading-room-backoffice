@@ -9,6 +9,8 @@ export const routes = (router: KoaRouter) => {
       return (ctx.status = 403)
     }
 
+    const filter = ctx.request.query.filter
+
     const fieldFilterConfigs: FieldFilterConfig[] = [
       {
         fieldName: 'depositor',
@@ -40,7 +42,7 @@ export const routes = (router: KoaRouter) => {
 
     await setValues(
       fieldFilterConfigs,
-      undefined,
+      filter,
       undefined,
       undefined,
       undefined,

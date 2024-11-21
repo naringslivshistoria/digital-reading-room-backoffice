@@ -23,14 +23,11 @@ export interface FieldFilter {
   values: string[]
 }
 
-export const useFieldValues = ({
-  filter,
-}: {
-  filter: string | undefined | null
-}) =>
-  useQuery<FieldFilterConfig[], AxiosError>({
+export const useFieldValues = ({ filter }: { filter: string | undefined }) => {
+  return useQuery<FieldFilterConfig[], AxiosError>({
+    queryKey: ['fieldFilters', filter],
     queryFn: async () => {
-      const filterparam = filter ? '?filter=' + encodeURIComponent(filter) : ''
+      const filterparam = filter ? `?filter=${encodeURIComponent(filter)}` : ''
       const { data } = await axios.get(
         `${backendUrl}/search/get-field-filters${filterparam}`,
         {
@@ -40,8 +37,8 @@ export const useFieldValues = ({
           withCredentials: true,
         }
       )
-
       return data
     },
-    staleTime: Infinity,
+    staleTime: 30000,
   })
+}

@@ -1,4 +1,4 @@
-import { Autocomplete, Grid, IconButton, TextField } from '@mui/material'
+import { Grid, IconButton, Autocomplete, TextField } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 
 import { ItemSelectorProps } from '../../../common/types'
@@ -8,83 +8,83 @@ export const ItemSelector = ({
   onDepositorChange,
   archiveValue,
   onArchiveChange,
+  seriesValue,
+  onSeriesChange,
+  volumeValue,
+  onVolumeChange,
   depositorOptions,
   archiveOptions,
   seriesOptions,
-  seriesValue,
-  onSeriesChange,
   volumeOptions,
-  volumeValue,
-  onVolumeChange,
   onAdd,
   disabled = false,
 }: ItemSelectorProps) => {
+  const fields = [
+    {
+      label: 'Välj deponent',
+      placeholder: 'Sök deponent...',
+      value: depositorValue,
+      onChange: onDepositorChange,
+      options: depositorOptions,
+      disabled: false,
+    },
+    {
+      label: 'Välj arkivbildare',
+      placeholder: 'Sök arkivbildare...',
+      value: archiveValue,
+      onChange: onArchiveChange,
+      options: archiveOptions,
+      disabled: !depositorValue || archiveOptions.length === 0,
+    },
+  ]
+
+  if (seriesOptions && onSeriesChange) {
+    fields.push({
+      label: 'Välj serie',
+      placeholder: 'Sök serie...',
+      value: seriesValue || '',
+      onChange: onSeriesChange,
+      options: seriesOptions,
+      disabled: !archiveValue || seriesOptions.length === 0,
+    })
+  }
+
+  if (volumeOptions && onVolumeChange) {
+    fields.push({
+      label: 'Välj volym',
+      placeholder: 'Sök volym...',
+      value: volumeValue || '',
+      onChange: onVolumeChange,
+      options: volumeOptions,
+      disabled: !seriesValue || volumeOptions.length === 0,
+    })
+  }
+
   return (
-    <Grid sx={{ display: 'flex', gap: 2 }}>
-      <Autocomplete
-        options={depositorOptions}
-        value={depositorValue}
-        onChange={(_, newValue) => onDepositorChange(newValue || '')}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Välj deponent"
-            placeholder="Sök deponent..."
+    <Grid container>
+      <Grid sx={{ display: 'flex', gap: 2, flex: 1 }}>
+        {fields.map((field, index) => (
+          <Autocomplete
+            key={index}
+            options={field.options}
+            value={field.value || null}
+            onChange={(_, newValue) => field.onChange(newValue || '')}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={field.label}
+                placeholder={field.placeholder}
+              />
+            )}
+            fullWidth
+            disabled={field.disabled}
           />
-        )}
-        fullWidth
-      />
-      <Autocomplete
-        options={archiveOptions}
-        value={archiveValue}
-        onChange={(_, newValue) => onArchiveChange(newValue || '')}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Välj arkivbildare"
-            placeholder="Sök arkivbildare..."
-          />
-        )}
-        fullWidth
-        disabled={!depositorValue}
-      />
-      {seriesOptions && (
-        <Autocomplete
-          options={seriesOptions}
-          value={seriesValue}
-          onChange={(_, newValue) => onSeriesChange(newValue || '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Välj serie"
-              placeholder="Sök serie..."
-            />
-          )}
-          fullWidth
-          disabled={!archiveValue}
-        />
-      )}
+        ))}
 
-      {volumeOptions && (
-        <Autocomplete
-          options={volumeOptions}
-          value={volumeValue}
-          onChange={(_, newValue) => onVolumeChange(newValue || '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Välj volym"
-              placeholder="Sök volym..."
-            />
-          )}
-          fullWidth
-          disabled={!archiveValue || !seriesValue}
-        />
-      )}
-
-      <IconButton onClick={onAdd} disabled={disabled}>
-        <AddIcon />
-      </IconButton>
+        <IconButton onClick={onAdd} disabled={disabled}>
+          <AddIcon />
+        </IconButton>
+      </Grid>
     </Grid>
   )
 }

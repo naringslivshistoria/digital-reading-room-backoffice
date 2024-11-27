@@ -14,17 +14,18 @@ import {
   Typography,
   Autocomplete,
   Chip,
+  Tooltip,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import InfoIcon from '@mui/icons-material/Info'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
 import { Role, User, UserFormState } from '../../common/types'
 import { useFieldValues } from './hooks/useFilters'
-import { ItemSelector } from './components/ItemSelector'
-import { ItemList } from './components/ItemList'
+import { ItemSection } from './components/ItemSection'
 
 export const UserEdit = () => {
   useIsLoggedIn()
@@ -133,7 +134,20 @@ export const UserEdit = () => {
             rowSpacing={4}
             sx={{ marginTop: 0, marginBottom: '40px' }}
           >
-            <Grid item md={7} xs={12}>
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Användare</Typography>
+              <Tooltip
+                title="Användarnamnet är epostadressen, användare av typen Administratör kan både logga in i backoffice och i läsesalen. Vanliga användare kan bara logga in i läsesalen. "
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
+            </Grid>
+            <Grid item xs={6}>
               <TextField
                 id="username"
                 label="Användarnamn (epostadress)"
@@ -145,10 +159,7 @@ export const UserEdit = () => {
                 fullWidth
               />
             </Grid>
-            <Grid item md={5} xs={12}>
-              Användarnamnet är epostadressen
-            </Grid>
-            <Grid item md={7} xs={12}>
+            <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel id="role-label">Användartyp</InputLabel>
                 <Select
@@ -167,11 +178,20 @@ export const UserEdit = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item md={5} xs={12}>
-              Användare av typen Administratör kan både logga in i backoffice
-              och i läsesalen. Vanliga användare kan bara logga in i läsesalen.
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Deponenter</Typography>
+              <Tooltip
+                title="Ange deponenter användaren ska kunna se i läsesalen. Allt material för en deponent som anges här kommer vara åtkomligt för användaren."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
             </Grid>
-            <Grid item md={7} xs={12}>
+            <Grid item xs={12}>
               <Autocomplete
                 multiple
                 freeSolo
@@ -229,8 +249,7 @@ export const UserEdit = () => {
                   setEditUser(updatedUser)
                 }}
                 fullWidth
-                disableCloseOnSelect
-                noOptionsText="Inga deponenter hittades"
+                noOptionsText="Skriv in grupp och tryck Enter"
               />
             </Grid>
             <Grid item md={5} xs={12}>
@@ -375,38 +394,42 @@ export const UserEdit = () => {
                 fullWidth
               />
             </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange filnamn för de dokument användaren ska kunna se i
-                läsesalen. Skriv in filnamnet och tryck Enter för att lägga till
-                det.
-              </p>
+
+            {/* Status */}
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Status</Typography>
+              <Tooltip
+                title="Efter tre misslyckade inloggningsförsök markeras kontot automatiskt som låst, och kan då inte användas för inloggning. Om ett konto är avstängt så har det låsts manuellt av en administratör."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
             </Grid>
-            <Grid item md={7} xs={12}>
-              <FormControlLabel
-                control={<Checkbox id="locked" />}
-                label="Låst"
-                checked={editUser.locked}
-                onChange={(event, checked: boolean) =>
-                  setEditUser({ ...editUser, locked: checked })
-                }
-              />
-              <FormControlLabel
-                control={<Checkbox id="disabled" />}
-                label="Avstängt"
-                checked={editUser.disabled}
-                onChange={(event, checked: boolean) =>
-                  setEditUser({ ...editUser, disabled: checked })
-                }
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Efter tre misslyckade inloggningsförsök markeras kontot
-                automatiskt som låst, och kan då inte användas för inloggning.
-                Om ett konto är avstängt så har det låsts manuellt av en
-                administratör.
-              </p>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FormControlLabel
+                  control={<Checkbox id="locked" />}
+                  label="Låst"
+                  checked={editUser.locked}
+                  onChange={(event, checked: boolean) =>
+                    setEditUser({ ...editUser, locked: checked })
+                  }
+                  sx={{ width: '100%' }}
+                />
+                <FormControlLabel
+                  control={<Checkbox id="disabled" />}
+                  label="Avstängt"
+                  checked={editUser.disabled}
+                  onChange={(event, checked: boolean) =>
+                    setEditUser({ ...editUser, disabled: checked })
+                  }
+                  sx={{ width: '100%' }}
+                />
+              </Box>
             </Grid>
             <Grid item md={12} xs={12}>
               {error && <Alert severity="error">{error}</Alert>}

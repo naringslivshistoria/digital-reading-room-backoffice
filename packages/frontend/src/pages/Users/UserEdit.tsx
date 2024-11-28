@@ -24,8 +24,8 @@ import InfoIcon from '@mui/icons-material/Info'
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
 import { Role, User, UserFormState } from '../../common/types'
-import { useFieldValues } from './hooks/useFilters'
 import { ItemSection } from './components/ItemSection'
+import { useFieldOptions } from './hooks/useFieldOptions'
 
 export const UserEdit = () => {
   useIsLoggedIn()
@@ -189,43 +189,7 @@ export const UserEdit = () => {
     }
   }
 
-  const getFieldOptions = (fieldName: string, filter?: string) => {
-    const { data } = useFieldValues({ filter })
-    return (
-      data?.find((filterConfig) => filterConfig.fieldName === fieldName)
-        ?.allValues || []
-    )
-  }
-
-  const depositorOptions = getFieldOptions('depositor')
-
-  const getFilteredOptions = (
-    fieldName: string,
-    filterFieldName: string,
-    filterValue: string | undefined,
-    selectedItems: string[],
-    levelIndex: number,
-    currentValue: string
-  ) => {
-    const options = getFieldOptions(
-      fieldName,
-      filterValue ? `${filterFieldName}::${filterValue}` : undefined
-    )
-
-    const filteredItems = selectedItems
-      .map((item) => item.split('>')[levelIndex])
-      .filter((item) => item && item !== currentValue)
-
-    const filteredOptions = options.filter(
-      (option) => !filteredItems.includes(option)
-    )
-
-    if (currentValue && !filteredOptions.includes(currentValue)) {
-      filteredOptions.push(currentValue)
-    }
-
-    return filteredOptions
-  }
+  const depositorOptions = useFieldOptions('depositor')
 
   const handleGroupsChange = (event: any, newValue: string[]) => {
     const validGroups = newValue
@@ -442,44 +406,6 @@ export const UserEdit = () => {
               />
             </Grid>
             {sections.map((section) => {
-              const sectionFormState = formState[
-                section.formStateSection as keyof UserFormState
-              ] as Record<string, string>
-              const selectedItems =
-                formState.selectedItems[
-                  section.formStateSection as keyof UserFormState['selectedItems']
-                ]
-              const archiveOptions = getFilteredOptions(
-                'archiveInitiator',
-                'depositor',
-                sectionFormState.depositor,
-                selectedItems,
-                1,
-                sectionFormState.archive
-              )
-
-              const seriesOptions = section.fieldNames.includes('seriesName')
-                ? getFilteredOptions(
-                    'seriesName',
-                    'archiveInitiator',
-                    sectionFormState.archive,
-                    selectedItems,
-                    2,
-                    sectionFormState.series
-                  )
-                : undefined
-
-              const volumeOptions = section.fieldNames.includes('volume')
-                ? getFilteredOptions(
-                    'volume',
-                    'seriesName',
-                    sectionFormState.series,
-                    selectedItems,
-                    3,
-                    sectionFormState.volume
-                  )
-                : undefined
-              const disabled = Object.values(sectionFormState).some((v) => !v)
               return (
                 <ItemSection
                   key={section.title}
@@ -491,10 +417,7 @@ export const UserEdit = () => {
                   handleAddItem={handleAddItem}
                   handleRemoveItem={handleRemoveItem}
                   depositorOptions={depositorOptions}
-                  archiveOptions={archiveOptions}
-                  seriesOptions={seriesOptions}
-                  volumeOptions={volumeOptions}
-                  disabled={disabled}
+                  section={section}
                 />
               )
             })}
@@ -538,8 +461,6 @@ export const UserEdit = () => {
                 fullWidth
               />
             </Grid>
-
-            {/* Status */}
             <Grid
               item
               xs={12}

@@ -4,6 +4,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import { ItemSelector } from './ItemSelector'
 import { ItemList } from './ItemList'
 import { UserFormState, ItemSectionProps } from '../../../common/types'
+import { useFilteredOptions } from '../hooks/useFilteredOptions'
 
 export const ItemSection = ({
   title,
@@ -14,16 +15,50 @@ export const ItemSection = ({
   handleAddItem,
   handleRemoveItem,
   depositorOptions,
-  archiveOptions,
-  seriesOptions,
-  volumeOptions,
-  disabled,
+  section,
 }: ItemSectionProps) => {
   const sectionFormState = formState[formStateSection] as Record<string, string>
   const selectedItems =
     formState.selectedItems[
       formStateSection as keyof UserFormState['selectedItems']
     ]
+
+  const archiveOptions = useFilteredOptions({
+    fieldName: 'archiveInitiator',
+    filterFieldName: 'depositor',
+    filterValue: sectionFormState.depositor,
+    selectedItems,
+    levelIndex: 1,
+    currentValue: sectionFormState.archive,
+  })
+
+  const seriesOptions = useFilteredOptions({
+    fieldName: 'seriesName',
+    filterFieldName: 'archiveInitiator',
+    filterValue: sectionFormState.archive,
+    selectedItems,
+    levelIndex: 2,
+    currentValue: sectionFormState.series,
+  })
+
+  const volumeOptions = useFilteredOptions({
+    fieldName: 'volume',
+    filterFieldName: 'seriesName',
+    filterValue: sectionFormState.series,
+    selectedItems,
+    levelIndex: 3,
+    currentValue: sectionFormState.volume,
+  })
+
+  const filteredSeriesOptions = section.fieldNames.includes('seriesName')
+    ? seriesOptions
+    : undefined
+
+  const filteredVolumeOptions = section.fieldNames.includes('volume')
+    ? volumeOptions
+    : undefined
+
+  const disabled = Object.values(sectionFormState).some((v) => !v)
 
   return (
     <>
@@ -53,8 +88,8 @@ export const ItemSection = ({
           }
           depositorOptions={depositorOptions}
           archiveOptions={archiveOptions}
-          seriesOptions={seriesOptions}
-          volumeOptions={volumeOptions}
+          seriesOptions={filteredSeriesOptions}
+          volumeOptions={filteredVolumeOptions}
           onAdd={() => handleAddItem(formStateSection)}
           disabled={disabled}
         />

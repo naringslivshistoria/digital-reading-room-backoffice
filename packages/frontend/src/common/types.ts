@@ -94,16 +94,12 @@ interface ItemSectionProps {
     field: string,
     value: string
   ) => void
-  handleAddItem: (type: string) => void
-  handleRemoveItem: (
-    type: keyof UserFormState['selectedItems'],
-    itemToRemove: string
-  ) => void
+  handleAddItem: (type: keyof UserFormState) => void
+  handleRemoveItem: (type: keyof UserFormState, itemToRemove: string) => void
+  section: {
+    fieldNames: string[]
+  }
   depositorOptions: string[]
-  archiveOptions: string[]
-  seriesOptions?: string[]
-  volumeOptions?: string[]
-  disabled: boolean
 }
 
 interface ItemListProps {
@@ -169,6 +165,15 @@ interface UserToolbarProps {
   allGroups: string[]
 }
 
+interface FilteredOptionsProps {
+  fieldName: string
+  filterFieldName: string
+  filterValue: string | undefined
+  selectedItems: string[]
+  levelIndex: number
+  currentValue: string
+}
+
 export type {
   Document,
   Field,
@@ -183,4 +188,5 @@ export type {
   UserFormState,
   UserTableProps,
   UserToolbarProps,
+  FilteredOptionsProps,
 }

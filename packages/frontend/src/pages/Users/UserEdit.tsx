@@ -50,6 +50,23 @@ export const UserEdit = () => {
         location.state.user.fileNames?.split(';').filter(Boolean) || [],
     },
   })
+  const allGroups = location.state.allGroups
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
+    const userGroups = location.state.user.groups
+    if (!userGroups) {
+      return []
+    }
+
+    if (typeof userGroups === 'string') {
+      try {
+        return JSON.parse(userGroups)
+      } catch {
+        return []
+      }
+    }
+
+    return Array.isArray(userGroups) ? userGroups : []
+  })
 
   const handleFormChange = (
     section: keyof UserFormState,
@@ -158,7 +175,13 @@ export const UserEdit = () => {
     if (editUser) {
       setError(null)
       try {
-        await updateUser.mutateAsync(editUser)
+        const userToSave = {
+          ...editUser,
+          groups: Array.isArray(editUser.groups)
+            ? JSON.stringify(editUser.groups)
+            : editUser.groups,
+        }
+        await updateUser.mutateAsync(userToSave)
         navigate('/users')
       } catch (axiosError: any) {
         setError(axiosError.response.data.error)
@@ -202,6 +225,19 @@ export const UserEdit = () => {
     }
 
     return filteredOptions
+  }
+
+  const handleGroupsChange = (event: any, newValue: string[]) => {
+    const validGroups = newValue
+      .filter(Boolean)
+      .map((group) => group.trim())
+      .filter((group) => group.length > 0)
+
+    setSelectedGroups(validGroups)
+    setEditUser((prev) => ({
+      ...prev,
+      groups: validGroups,
+    }))
   }
 
   const sections: {
@@ -299,6 +335,54 @@ export const UserEdit = () => {
                   <MenuItem value="Admin">Administratör</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Grupper</Typography>
+              <Tooltip
+                title="Grupper som användaren tillhör. Tryck enter för att spara."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
+            </Grid>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={allGroups || []}
+                value={selectedGroups}
+                onChange={(event, newValue) =>
+                  handleGroupsChange(event, newValue)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                  }
+                }}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Skriv in grupper och tryck Enter"
+                    placeholder="Skriv grupp..."
+                  />
+                )}
+                fullWidth
+                noOptionsText="Skriv in grupp och tryck Enter"
+              />
             </Grid>
             <Grid
               item

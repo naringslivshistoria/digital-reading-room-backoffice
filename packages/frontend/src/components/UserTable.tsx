@@ -8,11 +8,12 @@ import {
   Box,
   IconButton,
   Chip,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material'
 import { Link } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useTheme, useMediaQuery } from '@mui/material'
 
 import { UserTableProps } from '../common/types'
 

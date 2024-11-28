@@ -36,7 +36,6 @@ interface User {
   role: Role | null
   volumes: string | null
   series: string | null
-  groups: string | string[] | null
 }
 
 interface ImportLevel {
@@ -65,6 +64,76 @@ interface Import {
 export enum Role {
   Admin = 'Admin',
   User = 'User',
+}
+
+interface ItemSelectorProps {
+  depositorValue: string
+  onDepositorChange: (value: string) => void
+  archiveValue: string
+  onArchiveChange: (value: string) => void
+  depositorOptions: string[]
+  archiveOptions: string[]
+  seriesOptions?: string[]
+  seriesValue?: string
+  onSeriesChange?: (value: string) => void
+  volumeOptions?: string[]
+  volumeValue?: string
+  onVolumeChange?: (value: string) => void
+  onAdd: () => void
+  disabled?: boolean
+}
+
+interface ItemSectionProps {
+  title: string
+  tooltip: string
+  formStateSection: keyof UserFormState
+  formState: UserFormState
+  handleFormChange: (
+    section: keyof UserFormState,
+    field: string,
+    value: string
+  ) => void
+  handleAddItem: (type: string) => void
+  handleRemoveItem: (
+    type: keyof UserFormState['selectedItems'],
+    itemToRemove: string
+  ) => void
+  depositorOptions: string[]
+  archiveOptions: string[]
+  seriesOptions?: string[]
+  volumeOptions?: string[]
+  disabled: boolean
+}
+
+interface ItemListProps {
+  items: string[]
+  onDelete: (item: string) => void
+}
+
+interface UserFormState {
+  depositors: string
+  archiveInitiators: {
+    depositor: string
+    archive: string
+  }
+  series: {
+    depositor: string
+    archive: string
+    series: string
+  }
+  volumes: {
+    depositor: string
+    archive: string
+    series: string
+    volume: string
+  }
+  selectedItems: {
+    depositors: string[]
+    archiveInitiators: string[]
+    series: string[]
+    volumes: string[]
+    fileNames: string[]
+  }
 }
 
 type ColumnConfig = {
@@ -107,6 +176,10 @@ export type {
   ImportLevel,
   User,
   ColumnConfig,
+  ItemSelectorProps,
+  ItemSectionProps,
+  ItemListProps,
+  UserFormState,
   UserTableProps,
   UserToolbarProps,
 }

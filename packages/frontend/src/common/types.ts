@@ -155,6 +155,8 @@ interface UserTableProps {
   showGrid: boolean
   expandedGroup: string | null
   allGroups: string[]
+  selectedUsers: Set<string>
+  onUserSelect: (userId: string) => void
 }
 
 interface UserToolbarProps {
@@ -163,6 +165,8 @@ interface UserToolbarProps {
   onSearchChange: (value: string) => void
   onDisplayModeChange: (grid: boolean) => void
   allGroups: string[]
+  selectedUsers: Set<string>
+  onBatchAction: (action: string) => void
 }
 
 interface FilteredOptionsProps {

@@ -14,26 +14,42 @@ import {
   Typography,
   Autocomplete,
   Chip,
+  Tooltip,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import InfoIcon from '@mui/icons-material/Info'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
-import { Role, User } from '../../common/types'
-import { useFieldValues } from './hooks/useFilters'
+import { Role, User, UserFormState } from '../../common/types'
+import { ItemSection } from './components/ItemSection'
+import { useFieldOptions } from './hooks/useFieldOptions'
 
 export const UserEdit = () => {
   useIsLoggedIn()
-  const { data: filterConfigs } = useFieldValues({ filter: null })
   const location = useLocation()
   const navigate = useNavigate()
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
-  const [error, setError] = useState<string | null>()
-  const [showDepositors, setShowDepositors] = useState(false)
-  const [showArchiveInitiators, setShowArchiveInitiators] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [formState, setFormState] = useState<UserFormState>({
+    depositors: '',
+    archiveInitiators: { depositor: '', archive: '' },
+    series: { depositor: '', archive: '', series: '' },
+    volumes: { depositor: '', archive: '', series: '', volume: '' },
+    selectedItems: {
+      depositors:
+        location.state.user.depositors?.split(';').filter(Boolean) || [],
+      archiveInitiators:
+        location.state.user.archiveInitiators?.split(';').filter(Boolean) || [],
+      series: location.state.user.series?.split(';').filter(Boolean) || [],
+      volumes: location.state.user.volumes?.split(';').filter(Boolean) || [],
+      fileNames:
+        location.state.user.fileNames?.split(';').filter(Boolean) || [],
+    },
+  })
   const allGroups = location.state.allGroups
   const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
     const userGroups = location.state.user.groups
@@ -51,40 +67,108 @@ export const UserEdit = () => {
 
     return Array.isArray(userGroups) ? userGroups : []
   })
-  const expandedGroup = location.state.expandedGroup
 
-  const addDepositor = (depositor: string) => {
-    if (editUser.depositors) {
-      if (editUser.depositors.indexOf(depositor) !== -1) {
-        return
-      }
-    }
-
-    const updatedUser = { ...editUser }
-    if (updatedUser.depositors) {
-      updatedUser.depositors += ';' + depositor
-    } else {
-      updatedUser.depositors = depositor
-    }
-
-    setEditUser(updatedUser)
+  const handleFormChange = (
+    section: keyof UserFormState,
+    field: string,
+    value: string
+  ) => {
+    setFormState((prev) => ({
+      ...prev,
+      [section]:
+        typeof prev[section] === 'object'
+          ? {
+              ...Object.fromEntries(
+                Object.entries(prev[section] as Record<string, string>).map(
+                  ([key, currentValue], index, array) => {
+                    const fieldIndex = array.findIndex(([k]) => k === field)
+                    return [key, index <= fieldIndex ? currentValue : '']
+                  }
+                )
+              ),
+              [field]: value,
+            }
+          : value,
+    }))
   }
 
-  const addArchiveInitiator = (archiveInitiator: string) => {
-    if (editUser.archiveInitiators) {
-      if (editUser.archiveInitiators.indexOf(archiveInitiator) !== -1) {
-        return
-      }
-    }
+  const handleAddItem = (type: string) => {
+    let fields: string[] = []
 
-    const updatedUser = { ...editUser }
-    if (updatedUser.archiveInitiators) {
-      updatedUser.archiveInitiators += ';' + archiveInitiator
+    if (type === 'depositors') {
+      if (!formState.depositors) return
+      fields = [formState.depositors]
+      if (formState.selectedItems.depositors.includes(fields[0])) return
     } else {
-      updatedUser.archiveInitiators = archiveInitiator
+      const values = Object.values(formState[type as keyof UserFormState])
+      if (values.some((value) => !value)) return
+      fields = values as string[]
+      const newItem = fields.join('>')
+      if (
+        formState.selectedItems[
+          type as keyof UserFormState['selectedItems']
+        ].includes(newItem)
+      )
+        return
     }
 
-    setEditUser(updatedUser)
+    const newItem = fields.join('>')
+    const updatedItems = [
+      ...formState.selectedItems[type as keyof UserFormState['selectedItems']],
+      newItem,
+    ]
+    setFormState((prev) => ({
+      ...prev,
+      selectedItems: {
+        ...prev.selectedItems,
+        [type]: updatedItems,
+      },
+      [type]:
+        type === 'depositors'
+          ? ''
+          : {
+              ...(prev[type as keyof UserFormState] as Record<string, string>),
+              [Object.keys(prev[type as keyof UserFormState]).pop() || '']: '',
+            },
+    }))
+    setEditUser((prev) => ({
+      ...prev,
+      [type]: updatedItems.join(';'),
+    }))
+  }
+
+  const handleRemoveItem = (
+    type: keyof UserFormState['selectedItems'],
+    itemToRemove: string
+  ) => {
+    const updatedItems = formState.selectedItems[type].filter(
+      (item) => item !== itemToRemove
+    )
+    setFormState((prev) => ({
+      ...prev,
+      selectedItems: {
+        ...prev.selectedItems,
+        [type]: updatedItems,
+      },
+    }))
+    setEditUser((prev) => ({
+      ...prev,
+      [type]: updatedItems.join(';'),
+    }))
+  }
+
+  const handleFileNamesChange = (newValue: string[]) => {
+    setFormState((prev) => ({
+      ...prev,
+      selectedItems: {
+        ...prev.selectedItems,
+        fileNames: newValue,
+      },
+    }))
+    setEditUser((prev) => ({
+      ...prev,
+      fileNames: newValue.join(';'),
+    }))
   }
 
   const saveUser = async () => {
@@ -93,10 +177,9 @@ export const UserEdit = () => {
       try {
         const userToSave = {
           ...editUser,
-          groups:
-            typeof editUser.groups === 'string'
-              ? editUser.groups
-              : JSON.stringify(editUser.groups),
+          groups: Array.isArray(editUser.groups)
+            ? JSON.stringify(editUser.groups)
+            : editUser.groups,
         }
         await updateUser.mutateAsync(userToSave)
         navigate('/users')
@@ -106,15 +189,49 @@ export const UserEdit = () => {
     }
   }
 
+  const depositorOptions = useFieldOptions('depositor')
+
   const handleGroupsChange = (event: any, newValue: string[]) => {
     const validGroups = newValue
-      .filter((group) => typeof group === 'string' && group.trim().length > 0)
+      .filter(Boolean)
       .map((group) => group.trim())
+      .filter((group) => group.length > 0)
+
     setSelectedGroups(validGroups)
-    const updatedUser = { ...editUser }
-    updatedUser.groups = JSON.stringify(validGroups)
-    setEditUser(updatedUser)
+    setEditUser((prev) => ({
+      ...prev,
+      groups: validGroups,
+    }))
   }
+
+  const sections: {
+    title: string
+    tooltip: string
+    formStateSection: keyof UserFormState
+    fieldNames: string[]
+  }[] = [
+    {
+      title: 'Arkivbildare',
+      tooltip:
+        'Ange arkivbildare användaren ska kunna se i läsesalen. Allt material för en arkivbildare som anges här kommer vara åtkomligt för användaren.',
+      formStateSection: 'archiveInitiators',
+      fieldNames: ['depositor', 'archiveInitiator'],
+    },
+    {
+      title: 'Serier',
+      tooltip:
+        'Ange serier användaren ska kunna se i läsesalen. Välj först en deponent och ett arkiv, skriv sedan in serienamnet. Tryck Enter för att lägga till serien.',
+      formStateSection: 'series',
+      fieldNames: ['depositor', 'archiveInitiator', 'seriesName'],
+    },
+    {
+      title: 'Volymer',
+      tooltip:
+        'Ange volymer användaren ska kunna se i läsesalen. Välj först en deponent, ett arkiv och en serie, skriv sedan in volymnamnet. Tryck Enter för att lägga till volymen.',
+      formStateSection: 'volumes',
+      fieldNames: ['depositor', 'archiveInitiator', 'seriesName', 'volume'],
+    },
+  ]
 
   return (
     editUser && (
@@ -123,7 +240,10 @@ export const UserEdit = () => {
           <Box sx={{ marginTop: 3, marginBottom: 2 }}>
             <Link
               to="/users"
-              state={{ expandedGroup, showGrid: location.state.showGrid }}
+              state={{
+                expandedGroup: location.state.expandedGroup,
+                showGrid: location.state.showGrid,
+              }}
             >
               <ChevronLeftIcon sx={{ marginTop: '-2px' }} /> Användare
             </Link>
@@ -132,53 +252,68 @@ export const UserEdit = () => {
           <Typography variant="h2">Administrera användare</Typography>
           <Grid
             container
-            spacing={4}
+            columnSpacing={4}
+            rowSpacing={4}
             sx={{ marginTop: 0, marginBottom: '40px' }}
           >
-            <Grid item md={7} xs={12}>
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Användare</Typography>
+              <Tooltip
+                title="Användarnamnet är epostadressen, användare av typen Administratör kan både logga in i backoffice och i läsesalen. Vanliga användare kan bara logga in i läsesalen. "
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
+            </Grid>
+            <Grid item xs={6}>
               <TextField
                 id="username"
                 label="Användarnamn (epostadress)"
                 variant="outlined"
                 value={editUser.username}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.username = event.target.value
-                  setEditUser(updatedUser)
-                }}
+                onChange={(event) =>
+                  setEditUser({ ...editUser, username: event.target.value })
+                }
                 fullWidth
               />
             </Grid>
-            <Grid item md={5} xs={12}>
-              Användarnamnet är epostadressen
-            </Grid>
-            <Grid item md={7} xs={12}>
+            <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel id="role-label">Användartyp</InputLabel>
                 <Select
                   labelId="role-label"
                   label="Användartyp"
                   value={editUser.role}
-                  onChange={(event) => {
-                    const updatedUser = {
+                  onChange={(event) =>
+                    setEditUser({
                       ...editUser,
-                    }
-                    updatedUser.role = event.target.value as Role
-                    setEditUser(updatedUser)
-                  }}
+                      role: event.target.value as Role,
+                    })
+                  }
                 >
                   <MenuItem value="User">Standard</MenuItem>
                   <MenuItem value="Admin">Administratör</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item md={5} xs={12}>
-              Användare av typen Administratör kan både logga in i backoffice
-              och i läsesalen. Vanliga användare kan bara logga in i läsesalen.
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Grupper</Typography>
+              <Tooltip
+                title="Grupper som användaren tillhör. Tryck enter för att spara."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
             </Grid>
-            <Grid item md={7} xs={12}>
+            <Grid item xs={12}>
               <Autocomplete
                 multiple
                 freeSolo
@@ -213,283 +348,153 @@ export const UserEdit = () => {
                 noOptionsText="Skriv in grupp och tryck Enter"
               />
             </Grid>
-            <Grid item md={5} xs={12}>
-              Grupper som användaren tillhör. Tryck enter för att spara.
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Deponenter</Typography>
+              <Tooltip
+                title="Ange deponenter användaren ska kunna se i läsesalen. Allt material för en deponent som anges här kommer vara åtkomligt för användaren."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
             </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="depositors"
-                label="Deponenter"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.depositors ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.depositors = event.target.value.replaceAll(
-                    '\n',
-                    ''
-                  )
-                  setEditUser(updatedUser)
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange de deponenter användaren ska kunna se i läsesalen. Allt
-                material för en deponent som anges här kommer vara åtkomligt för
-                användaren. Ange flera deponenter med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1;
-                  <br />
-                  Deponent2;
-                </i>
-              </p>
-              <div>
-                <button onClick={() => setShowDepositors(!showDepositors)}>
-                  <b>Visa tillgängliga deponenter</b>
-                </button>
-                {showDepositors && (
-                  <Box
-                    sx={{
-                      maxHeight: 300,
-                      overflow: 'scroll',
-                      padding: 2,
-                      border: '1px solid black',
-                    }}
-                  >
-                    {showDepositors &&
-                      filterConfigs &&
-                      filterConfigs
-                        .find(
-                          (filterConfig) =>
-                            filterConfig.fieldName === 'depositor'
-                        )
-                        ?.allValues?.map((value) => (
-                          <Box key={value} sx={{ alignContent: 'left' }}>
-                            <Button
-                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
-                              onClick={() => {
-                                addDepositor(value)
-                              }}
-                            >
-                              {value}
-                            </Button>
-                          </Box>
-                        ))}
-                  </Box>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                options={depositorOptions.filter(
+                  (value) => !formState.selectedItems.depositors.includes(value)
                 )}
-              </div>
-            </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="archiveInitiators"
-                label="Arkiv"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.archiveInitiators ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.archiveInitiators = event.target.value.replaceAll(
-                    '\n',
-                    ''
-                  )
-                  setEditUser(updatedUser)
+                value={formState.selectedItems.depositors || null}
+                onChange={(event, newValue) => {
+                  setFormState((prev) => ({
+                    ...prev,
+                    selectedItems: {
+                      ...prev.selectedItems,
+                      depositors: newValue,
+                    },
+                    depositors: '',
+                  }))
+                  setEditUser((prev) => ({
+                    ...prev,
+                    depositors: newValue.join(';'),
+                  }))
                 }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange de arkivbildare användaren ska kunna se i läsesalen. Allt
-                material för en serie som anges här kommer vara åtkomligt för
-                användaren. Ange flera arkivbildare med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1;
-                  <br />
-                  Deponent2&gt;Arkivbildare1;
-                </i>
-              </p>
-              <div>
-                <button
-                  onClick={() =>
-                    setShowArchiveInitiators(!showArchiveInitiators)
-                  }
-                >
-                  <b>Visa tillgängliga arkiv</b>
-                </button>
-                {showArchiveInitiators && (
-                  <Box
-                    sx={{
-                      maxHeight: 300,
-                      overflow: 'scroll',
-                      padding: 2,
-                      border: '1px solid black',
-                    }}
-                  >
-                    {showArchiveInitiators &&
-                      filterConfigs &&
-                      filterConfigs
-                        .find(
-                          (filterConfig) =>
-                            filterConfig.fieldName === 'archiveInitiator'
-                        )
-                        ?.allValues?.map((value) => (
-                          <div key={value}>
-                            <Button
-                              sx={{ textAlign: 'left', lineHeight: 'normal' }}
-                              onClick={() => {
-                                addArchiveInitiator(value)
-                              }}
-                            >
-                              {value}
-                            </Button>
-                          </div>
-                        ))}
-                  </Box>
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      onDelete={() => handleRemoveItem('depositors', option)}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Lägg till deponenter genom att söka och klicka"
+                    placeholder="Sök deponenter..."
+                  />
                 )}
-              </div>
+                fullWidth
+                disableCloseOnSelect
+                noOptionsText="Inga deponenter hittades"
+              />
             </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="series"
-                label="Serier"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.series ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.series = event.target.value.replaceAll('\n', '')
-                  setEditUser(updatedUser)
-                }}
+            {sections.map((section) => {
+              return (
+                <ItemSection
+                  key={section.title}
+                  title={section.title}
+                  tooltip={section.tooltip}
+                  formStateSection={section.formStateSection}
+                  formState={formState}
+                  handleFormChange={handleFormChange}
+                  handleAddItem={handleAddItem}
+                  handleRemoveItem={handleRemoveItem}
+                  depositorOptions={depositorOptions}
+                  section={section}
+                />
+              )
+            })}
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Filnamn</Typography>
+              <Tooltip
+                title="Ange filnamn för de dokument användaren ska kunna se i läsesalen. Skriv in filnamnet och tryck Enter för att lägga till det."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
+            </Grid>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={formState.selectedItems.fileNames}
+                onChange={(event, newValue) => handleFileNamesChange(newValue)}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option, index) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Lägg till dokument"
+                    placeholder="Skriv filnamn och tryck Enter..."
+                  />
+                )}
                 fullWidth
               />
             </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange de serier användaren ska kunna se i läsesalen. Allt
-                material för en arkivbildare som anges här kommer vara åtkomligt
-                för användaren. Ange flera volymer med semikolon mellan.
-                Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1&gt;SerieA;
-                  <br />
-                  Deponent2&gt;Arkivbildare1&gt;SerieM;
-                </i>
-              </p>
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Typography variant="h3">Status</Typography>
+              <Tooltip
+                title="Efter tre misslyckade inloggningsförsök markeras kontot automatiskt som låst, och kan då inte användas för inloggning. Om ett konto är avstängt så har det låsts manuellt av en administratör."
+                placement="right"
+              >
+                <InfoIcon color="action" />
+              </Tooltip>
             </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="volumes"
-                label="Volymer"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.volumes ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FormControlLabel
+                  control={<Checkbox id="locked" />}
+                  label="Låst"
+                  checked={editUser.locked}
+                  onChange={(event, checked: boolean) =>
+                    setEditUser({ ...editUser, locked: checked })
                   }
-                  updatedUser.volumes = event.target.value.replaceAll('\n', '')
-                  setEditUser(updatedUser)
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange de volymer användaren ska kunna se i läsesalen. Allt
-                material för en volym som anges här kommer vara åtkomligt för
-                användaren. Ange flera volymer med semikolon mellan. Exempelvis:
-                <br />
-                <i>
-                  Deponent1&gt;Arkivbildare1&gt;SerieA&gt;Volym1;
-                  <br />
-                  Deponent2&gt;Arkivbildare1&gt;SerieM&gt;Volym5;
-                </i>
-              </p>
-            </Grid>
-            <Grid item md={7} xs={12}>
-              <TextField
-                id="fileNames"
-                label="Dokument"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={editUser.fileNames ?? undefined}
-                onChange={(event) => {
-                  const updatedUser = {
-                    ...editUser,
+                  sx={{ width: '100%' }}
+                />
+                <FormControlLabel
+                  control={<Checkbox id="disabled" />}
+                  label="Avstängt"
+                  checked={editUser.disabled}
+                  onChange={(event, checked: boolean) =>
+                    setEditUser({ ...editUser, disabled: checked })
                   }
-                  updatedUser.fileNames = event.target.value
-                  setEditUser(updatedUser)
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <p>
-                Ange filnamn för de dokument användaren ska kunna se i
-                läsesalen. Ange flera filnamn med semikolon mellan. Exempelvis:
-                <br />
-                <i>
-                  Filnamn1.jpg;
-                  <br />
-                  Filnamn2.pdf;
-                  <br />
-                  Filnamn10.pdf;
-                </i>
-              </p>
-            </Grid>
-            <Grid item md={7} xs={12}>
-              <FormControlLabel
-                control={<Checkbox id="locked" />}
-                label="Låst"
-                checked={editUser.locked}
-                onChange={(event, checked: boolean) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.locked = checked
-                  setEditUser(updatedUser)
-                }}
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              Efter tre misslyckade inloggningsförsök markeras konto automatiskt
-              som låst, och kan då inte användas för inloggning.
-            </Grid>
-            <Grid item md={7} xs={12}>
-              <FormControlLabel
-                control={<Checkbox id="disabled" />}
-                label="Avstängt"
-                checked={editUser.disabled}
-                onChange={(event, checked: boolean) => {
-                  const updatedUser = {
-                    ...editUser,
-                  }
-                  updatedUser.disabled = checked
-                  setEditUser(updatedUser)
-                }}
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              Om ett konto är låst så har det låsts manuellt av en
-              administratör.
+                  sx={{ width: '100%' }}
+                />
+              </Box>
             </Grid>
             <Grid item md={12} xs={12}>
               {error && <Alert severity="error">{error}</Alert>}

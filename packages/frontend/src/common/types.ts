@@ -37,6 +37,7 @@ interface User {
   volumes: string | null
   series: string | null
   groups: string | string[] | null
+  notes: string | null
 }
 
 interface ImportLevel {
@@ -94,12 +95,18 @@ interface ItemSectionProps {
     field: string,
     value: string
   ) => void
-  handleAddItem: (type: keyof UserFormState) => void
-  handleRemoveItem: (type: keyof UserFormState, itemToRemove: string) => void
+  handleAddItem: (type: string) => void
+  handleRemoveItem: (
+    type: keyof UserFormState['selectedItems'],
+    itemToRemove: string
+  ) => void
+  depositorOptions: string[]
   section: {
+    title: string
+    tooltip: string
+    formStateSection: keyof UserFormState
     fieldNames: string[]
   }
-  depositorOptions: string[]
 }
 
 interface ItemListProps {

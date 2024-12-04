@@ -30,7 +30,8 @@ const getUsers = async () => {
       'series',
       'volumes',
       'role',
-      'groups'
+      'groups',
+      'notes'
     )
     .from<User>('users')
     .orderBy('username')
@@ -52,7 +53,8 @@ const getUser = async (id: string) => {
       'series',
       'volumes',
       'role',
-      'groups'
+      'groups',
+      'notes'
     )
     .from<User>('users')
     .where('id', id)

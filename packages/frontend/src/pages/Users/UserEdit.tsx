@@ -466,6 +466,30 @@ export const UserEdit = () => {
               xs={12}
               sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
             >
+              <Typography variant="h3">Anteckningar</Typography>
+              <Tooltip title="Anteckningar om användaren." placement="right">
+                <InfoIcon color="action" />
+              </Tooltip>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="notes"
+                label="Anteckningar"
+                variant="outlined"
+                value={editUser.notes}
+                onChange={(event) =>
+                  setEditUser({ ...editUser, notes: event.target.value })
+                }
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
               <Typography variant="h3">Status</Typography>
               <Tooltip
                 title="Efter tre misslyckade inloggningsförsök markeras kontot automatiskt som låst, och kan då inte användas för inloggning. Om ett konto är avstängt så har det låsts manuellt av en administratör."

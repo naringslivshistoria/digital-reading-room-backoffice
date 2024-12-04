@@ -15,11 +15,14 @@ import {
   Autocomplete,
   Chip,
   Tooltip,
+  IconButton,
+  InputAdornment,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import InfoIcon from '@mui/icons-material/Info'
+import Password from '@mui/icons-material/Password'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
@@ -66,6 +69,10 @@ export const UserEdit = () => {
     }
 
     return Array.isArray(userGroups) ? userGroups : []
+  })
+  const [formErrors, setFormErrors] = useState({
+    username: '',
+    password: '',
   })
 
   const handleFormChange = (
@@ -171,9 +178,35 @@ export const UserEdit = () => {
     }))
   }
 
+  const validateForm = () => {
+    const errors = {
+      username: '',
+      password: '',
+    }
+
+    if (!editUser.username?.trim()) {
+      errors.username = 'Användarnamn måste anges'
+    }
+
+    if (!editUser.password?.trim() && isNewUser) {
+      errors.password = 'Lösenord måste anges'
+    } else if (editUser.password && editUser.password.length < 6) {
+      errors.password = 'Lösenord måste vara minst 6 tecken långt'
+    }
+
+    setFormErrors(errors)
+    return !Object.values(errors).some((error) => error)
+  }
+
   const saveUser = async () => {
     if (editUser) {
       setError(null)
+
+      if (!validateForm()) {
+        console.log('form errors', formErrors)
+        return
+      }
+
       try {
         const userToSave = {
           ...editUser,
@@ -233,6 +266,13 @@ export const UserEdit = () => {
     },
   ]
 
+  const generatePassword = () => {
+    const newPassword = Math.random().toString(36).slice(-8)
+    setEditUser((prev) => ({ ...prev, password: newPassword }))
+  }
+
+  const isNewUser = !location.state?.user?.username
+
   return (
     editUser && (
       <>
@@ -249,7 +289,9 @@ export const UserEdit = () => {
             </Link>
           </Box>
           <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
-          <Typography variant="h2">Administrera användare</Typography>
+          <Typography variant="h2">
+            {isNewUser ? 'Skapa användare' : 'Administrera användare'}
+          </Typography>
           <Grid
             container
             columnSpacing={4}
@@ -269,7 +311,7 @@ export const UserEdit = () => {
                 <InfoIcon color="action" />
               </Tooltip>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
               <TextField
                 id="username"
                 label="Användarnamn (epostadress)"
@@ -278,10 +320,36 @@ export const UserEdit = () => {
                 onChange={(event) =>
                   setEditUser({ ...editUser, username: event.target.value })
                 }
+                error={!!formErrors.username}
+                helperText={formErrors.username}
                 fullWidth
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
+              <TextField
+                id="password"
+                label={isNewUser ? 'Ange lösenord' : 'Ange nytt lösenord'}
+                variant="outlined"
+                value={editUser.password}
+                onChange={(event) =>
+                  setEditUser({ ...editUser, password: event.target.value })
+                }
+                error={!!formErrors.password}
+                helperText={formErrors.password}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={generatePassword}>
+                        <Password />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={2}>
               <FormControl fullWidth>
                 <InputLabel id="role-label">Användartyp</InputLabel>
                 <Select

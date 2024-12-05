@@ -24,6 +24,7 @@ interface Document {
 interface User {
   id: string
   username: string
+  password: string
   locked: boolean
   disabled: boolean
   passwordHash: string

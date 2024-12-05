@@ -24,9 +24,10 @@ interface Document {
 interface User {
   id: string
   username: string
+  password: string
   locked: boolean
   disabled: boolean
-  passwordHash: string
+  password_hash: string
   salt: string
   failedLoginAttempts: number
   depositors: string | null

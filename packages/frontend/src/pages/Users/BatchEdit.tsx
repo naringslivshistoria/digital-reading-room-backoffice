@@ -8,10 +8,6 @@ import {
   Chip,
   TextField,
   Tooltip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
@@ -19,12 +15,12 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import InfoIcon from '@mui/icons-material/Info'
+
 import { useUpdateUser } from './hooks/useUser'
-import { User, Role } from '../../common/types'
+import { User, UserFormState } from '../../common/types'
 import { useFieldOptions } from './hooks/useFieldOptions'
 import { ItemList } from './components/ItemList'
 import { ItemSection } from './components/ItemSection'
-import { UserFormState } from '../../common/types'
 
 export const BatchEdit = () => {
   const location = useLocation()
@@ -32,7 +28,6 @@ export const BatchEdit = () => {
   const updateUser = useUpdateUser()
   const [error, setError] = useState<string | null>(null)
   const [selectedValues, setSelectedValues] = useState<string[]>([])
-  const [selectedRole, setSelectedRole] = useState<Role>(Role.User)
   const [statusValues, setStatusValues] = useState({
     locked: false,
     disabled: false,
@@ -53,7 +48,6 @@ export const BatchEdit = () => {
   })
 
   const depositorOptions = useFieldOptions('depositor')
-  const selectedItems = selectedValues
 
   const handleFormChange = (
     section: keyof UserFormState,
@@ -118,13 +112,11 @@ export const BatchEdit = () => {
             groups: Array.isArray(user.groups)
               ? JSON.stringify(user.groups)
               : user.groups,
-            ...(editType === 'role' && { role: selectedRole }),
             ...(editType === 'status' && statusValues),
             ...(editType === 'groups' && {
               groups: JSON.stringify(selectedValues),
             }),
-            ...(editType !== 'role' &&
-              editType !== 'status' &&
+            ...(editType !== 'status' &&
               editType !== 'groups' && {
                 [editType]: selectedValues.join(';'),
               }),
@@ -145,7 +137,15 @@ export const BatchEdit = () => {
     }
   }
 
-  const sections = {
+  const sections: Record<
+    string,
+    {
+      title: string
+      tooltip: string
+      formStateSection: keyof UserFormState
+      fieldNames: string[]
+    }
+  > = {
     archiveInitiators: {
       title: 'Arkivbildare',
       tooltip: 'Välj arkivbildare som ska tilldelas alla markerade användare',
@@ -180,10 +180,6 @@ export const BatchEdit = () => {
         [type]: updatedItems,
       },
     }))
-    setEditUser((prev) => ({
-      ...prev,
-      [type]: updatedItems.join(';'),
-    }))
   }
 
   const renderEditField = () => {
@@ -194,16 +190,18 @@ export const BatchEdit = () => {
         return (
           <>
             <ItemSection
-              key={sections[editType].title}
-              title={sections[editType].title}
-              tooltip={sections[editType].tooltip}
-              formStateSection={sections[editType].formStateSection}
+              key={sections[editType as keyof typeof sections].title}
+              title={sections[editType as keyof typeof sections].title}
+              tooltip={sections[editType as keyof typeof sections].tooltip}
+              formStateSection={
+                sections[editType as keyof typeof sections].formStateSection
+              }
               formState={formState}
               handleFormChange={handleFormChange}
               handleAddItem={handleAddItem}
               handleRemoveItem={handleRemoveItem}
               depositorOptions={depositorOptions}
-              section={sections[editType]}
+              section={sections[editType as keyof typeof sections]}
             />
             <Grid item xs={12}>
               <ItemList
@@ -216,105 +214,135 @@ export const BatchEdit = () => {
           </>
         )
 
-      case 'role':
-        return (
-          <FormControl fullWidth>
-            <InputLabel>Användartyp</InputLabel>
-            <Select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as Role)}
-              label="Användartyp"
-            >
-              <MenuItem value="User">Standard</MenuItem>
-              <MenuItem value="Admin">Administratör</MenuItem>
-            </Select>
-          </FormControl>
-        )
-
       case 'groups':
         return (
-          <Autocomplete
-            multiple
-            freeSolo
-            options={allGroups || []}
-            value={selectedValues}
-            onChange={(_, newValue) => setSelectedValues(newValue)}
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  {...getTagProps({ index })}
+          <Grid sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="h3">{getTitle()}</Typography>
+                <Tooltip
+                  title="Välj värden som ska tilldelas alla markerade användare"
+                  placement="right"
+                >
+                  <InfoIcon color="action" />
+                </Tooltip>
+              </Box>
+            </Grid>
+            <Autocomplete
+              multiple
+              freeSolo
+              options={allGroups || []}
+              value={selectedValues}
+              onChange={(_, newValue) => setSelectedValues(newValue)}
+              renderTags={(value: readonly string[], getTagProps) =>
+                value.map((option, index) => (
+                  // eslint-disable-next-line react/jsx-key
+                  <Chip
+                    variant="outlined"
+                    label={option}
+                    {...getTagProps({ index })}
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Välj grupper"
+                  placeholder="Skriv eller välj grupp..."
                 />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Välj grupper"
-                placeholder="Skriv eller välj grupp..."
-              />
-            )}
-            fullWidth
-          />
+              )}
+              fullWidth
+            />
+          </Grid>
         )
 
       case 'status':
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={statusValues.locked}
-                  onChange={(e) =>
-                    setStatusValues((prev) => ({
-                      ...prev,
-                      locked: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Låst"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={statusValues.disabled}
-                  onChange={(e) =>
-                    setStatusValues((prev) => ({
-                      ...prev,
-                      disabled: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Avstängt"
-            />
-          </Box>
+          <Grid sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="h3">{getTitle()}</Typography>
+                <Tooltip
+                  title="Välj värden som ska tilldelas alla markerade användare"
+                  placement="right"
+                >
+                  <InfoIcon color="action" />
+                </Tooltip>
+              </Box>
+            </Grid>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusValues.locked}
+                    onChange={(e) =>
+                      setStatusValues((prev) => ({
+                        ...prev,
+                        locked: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="Låst"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusValues.disabled}
+                    onChange={(e) =>
+                      setStatusValues((prev) => ({
+                        ...prev,
+                        disabled: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="Avstängt"
+              />
+            </Box>
+          </Grid>
         )
 
       default:
         return (
-          <Autocomplete
-            multiple
-            options={editType === 'fileNames' ? [] : depositorOptions}
-            freeSolo={editType === 'fileNames'}
-            value={selectedValues}
-            onChange={(_, newValue) => setSelectedValues(newValue)}
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  {...getTagProps({ index })}
+          <Grid sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="h3">{getTitle()}</Typography>
+                <Tooltip
+                  title="Välj värden som ska tilldelas alla markerade användare"
+                  placement="right"
+                >
+                  <InfoIcon color="action" />
+                </Tooltip>
+              </Box>
+            </Grid>
+            <Autocomplete
+              multiple
+              options={editType === 'fileNames' ? [] : depositorOptions}
+              freeSolo={editType === 'fileNames'}
+              value={selectedValues}
+              onChange={(_, newValue) => setSelectedValues(newValue)}
+              renderTags={(value: readonly string[], getTagProps) =>
+                value.map((option, index) => (
+                  // eslint-disable-next-line react/jsx-key
+                  <Chip
+                    variant="outlined"
+                    label={option}
+                    {...getTagProps({ index })}
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Välj värden"
+                  placeholder="Sök..."
                 />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField {...params} label="Välj värden" placeholder="Sök..." />
-            )}
-            fullWidth
-          />
+              )}
+              fullWidth
+            />
+          </Grid>
         )
     }
   }
@@ -322,21 +350,19 @@ export const BatchEdit = () => {
   const getTitle = () => {
     switch (editType) {
       case 'depositors':
-        return 'Ändra deponenter'
+        return 'Deponenter'
       case 'archiveInitiators':
-        return 'Ändra arkivbildare'
+        return 'Arkivbildare'
       case 'series':
-        return 'Ändra serier'
+        return 'Serier'
       case 'volumes':
-        return 'Ändra volymer'
+        return 'Volymer'
       case 'fileNames':
-        return 'Ändra filnamn'
-      case 'role':
-        return 'Ändra användartyp'
+        return 'Filnamn'
       case 'groups':
-        return 'Ändra grupp'
+        return 'Grupp'
       case 'status':
-        return 'Ändra status'
+        return 'Status'
       default:
         return 'Batch-redigering'
     }
@@ -349,39 +375,12 @@ export const BatchEdit = () => {
           <ChevronLeftIcon sx={{ marginTop: '-2px' }} /> Användare
         </Link>
       </Box>
-      <Typography variant="h2">{getTitle()}</Typography>
+      <Typography variant="h2">Ändrar {getTitle().toLowerCase()}</Typography>
       <Typography variant="body1" sx={{ mt: 2, mb: 4 }}>
         Redigerar {users.length} användare
       </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="h3">
-              {editType === 'depositors'
-                ? 'Deponenter'
-                : editType === 'archiveInitiators'
-                ? 'Arkivbildare'
-                : editType === 'series'
-                ? 'Serier'
-                : editType === 'volumes'
-                ? 'Volymer'
-                : editType === 'fileNames'
-                ? 'Filnamn'
-                : editType === 'role'
-                ? 'Användartyp'
-                : editType === 'groups'
-                ? 'Grupp'
-                : 'Status'}
-            </Typography>
-            <Tooltip
-              title="Välj värden som ska tilldelas alla markerade användare"
-              placement="right"
-            >
-              <InfoIcon color="action" />
-            </Tooltip>
-          </Box>
-        </Grid>
+      <Grid container spacing={4} columnSpacing={4} rowSpacing={4}>
         <Grid item xs={12}>
           {renderEditField()}
         </Grid>

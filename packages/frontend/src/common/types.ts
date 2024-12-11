@@ -95,7 +95,10 @@ interface ItemSectionProps {
     value: string
   ) => void
   handleAddItem: (type: keyof UserFormState) => void
-  handleRemoveItem: (type: keyof UserFormState, itemToRemove: string) => void
+  handleRemoveItem: (
+    type: keyof UserFormState['selectedItems'],
+    itemToRemove: string
+  ) => void
   section: {
     fieldNames: string[]
   }

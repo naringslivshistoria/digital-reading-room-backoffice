@@ -8,15 +8,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Button,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useConfirm } from 'material-ui-confirm'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Checkbox from '@mui/material/Checkbox'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUsers } from './hooks/useUsers'
@@ -43,7 +39,6 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [pageByGroup, setPageByGroup] = useState<{ [key: string]: number }>({})
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
-  const [batchAction, setBatchAction] = useState<string>('')
   const allGroups =
     data?.users?.reduce((acc: string[], user: User) => {
       if (!user.groups) {
@@ -158,30 +153,6 @@ const Users = () => {
     setSearchQuery(newValue)
     setPage(0)
     setPageByGroup({})
-  }
-
-  const handleSelectAllInGroup = (group: string, users: User[]) => {
-    setSelectedUsers((prev) => {
-      const newSelected = new Set(prev)
-      users.forEach((user) => {
-        if (user.id) {
-          newSelected.add(user.id)
-        }
-      })
-      return newSelected
-    })
-  }
-
-  const handleDeselectAllInGroup = (group: string, users: User[]) => {
-    setSelectedUsers((prev) => {
-      const newSelected = new Set(prev)
-      users.forEach((user) => {
-        if (user.id) {
-          newSelected.delete(user.id)
-        }
-      })
-      return newSelected
-    })
   }
 
   const handleUserSelect = (userId: string) => {

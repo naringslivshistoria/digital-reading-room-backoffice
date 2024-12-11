@@ -19,7 +19,6 @@ import InfoIcon from '@mui/icons-material/Info'
 import { useUpdateUser } from './hooks/useUser'
 import { User, UserFormState } from '../../common/types'
 import { useFieldOptions } from './hooks/useFieldOptions'
-import { ItemList } from './components/ItemList'
 import { ItemSection } from './components/ItemSection'
 
 export const BatchEdit = () => {
@@ -79,19 +78,31 @@ export const BatchEdit = () => {
     if (type === 'depositors') {
       if (!formState.depositors) return
       fields = [formState.depositors]
-      if (selectedValues.includes(fields[0])) return
+      if (formState.selectedItems.depositors.includes(fields[0])) return
     } else {
       const values = Object.values(formState[type as keyof UserFormState])
       if (values.some((value) => !value)) return
       fields = values as string[]
       const newItem = fields.join('>')
-      if (selectedValues.includes(newItem)) return
+      if (
+        formState.selectedItems[
+          type as keyof UserFormState['selectedItems']
+        ].includes(newItem)
+      )
+        return
     }
 
     const newItem = fields.join('>')
-    setSelectedValues((prev) => [...prev, newItem])
+    const updatedItems = [
+      ...formState.selectedItems[type as keyof UserFormState['selectedItems']],
+      newItem,
+    ]
     setFormState((prev) => ({
       ...prev,
+      selectedItems: {
+        ...prev.selectedItems,
+        [type]: updatedItems,
+      },
       [type]:
         type === 'depositors'
           ? ''
@@ -100,6 +111,7 @@ export const BatchEdit = () => {
               [Object.keys(prev[type as keyof UserFormState]).pop() || '']: '',
             },
     }))
+    setSelectedValues((prev) => [...prev, newItem])
   }
 
   const handleSave = async () => {
@@ -188,7 +200,7 @@ export const BatchEdit = () => {
       case 'series':
       case 'volumes':
         return (
-          <>
+          <Grid sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <ItemSection
               key={sections[editType as keyof typeof sections].title}
               title={sections[editType as keyof typeof sections].title}
@@ -203,15 +215,7 @@ export const BatchEdit = () => {
               depositorOptions={depositorOptions}
               section={sections[editType as keyof typeof sections]}
             />
-            <Grid item xs={12}>
-              <ItemList
-                items={selectedValues}
-                onDelete={(item) => {
-                  setSelectedValues((prev) => prev.filter((v) => v !== item))
-                }}
-              />
-            </Grid>
-          </>
+          </Grid>
         )
 
       case 'groups':

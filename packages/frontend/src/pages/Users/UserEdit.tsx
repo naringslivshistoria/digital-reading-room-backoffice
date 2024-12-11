@@ -23,7 +23,13 @@ import InfoIcon from '@mui/icons-material/Info'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
-import { Role, User, UserFormState } from '../../common/types'
+import {
+  Role,
+  User,
+  UserFormState,
+  FormSection,
+  FormSectionKey,
+} from '../../common/types'
 import { ItemSection } from './components/ItemSection'
 import { useFieldOptions } from './hooks/useFieldOptions'
 
@@ -34,11 +40,17 @@ export const UserEdit = () => {
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
   const [error, setError] = useState<string | null>(null)
+
   const [formState, setFormState] = useState<UserFormState>({
     depositors: '',
-    archiveInitiators: { depositor: '', archive: '' },
-    series: { depositor: '', archive: '', series: '' },
-    volumes: { depositor: '', archive: '', series: '', volume: '' },
+    archiveInitiators: { depositor: '', archiveInitiator: '' },
+    series: { depositor: '', archiveInitiator: '', seriesName: '' },
+    volumes: {
+      depositor: '',
+      archiveInitiator: '',
+      seriesName: '',
+      volume: '',
+    },
     selectedItems: {
       depositors:
         location.state.user.depositors?.split(';').filter(Boolean) || [],
@@ -50,6 +62,7 @@ export const UserEdit = () => {
         location.state.user.fileNames?.split(';').filter(Boolean) || [],
     },
   })
+
   const allGroups = location.state.allGroups
   const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
     const userGroups = location.state.user.groups
@@ -73,23 +86,21 @@ export const UserEdit = () => {
     field: string,
     value: string
   ) => {
-    setFormState((prev) => ({
-      ...prev,
-      [section]:
-        typeof prev[section] === 'object'
-          ? {
-              ...Object.fromEntries(
-                Object.entries(prev[section] as Record<string, string>).map(
-                  ([key, currentValue], index, array) => {
-                    const fieldIndex = array.findIndex(([k]) => k === field)
-                    return [key, index <= fieldIndex ? currentValue : '']
-                  }
-                )
-              ),
-              [field]: value,
-            }
-          : value,
-    }))
+    const sectionDef = sections.find((s) => s.formStateSection === section)
+    if (sectionDef && typeof formState[section] === 'object') {
+      const fieldIndex = sectionDef.fieldNames.indexOf(field)
+      setFormState((prev) => {
+        const newSectionState = { ...(prev[section] as Record<string, string>) }
+        newSectionState[field] = value
+        for (let i = fieldIndex + 1; i < sectionDef.fieldNames.length; i++) {
+          const f = sectionDef.fieldNames[i]
+          newSectionState[f] = ''
+        }
+        return { ...prev, [section]: newSectionState }
+      })
+    } else {
+      setFormState((prev) => ({ ...prev, [section]: value }))
+    }
   }
 
   const handleAddItem = (type: string) => {
@@ -117,20 +128,33 @@ export const UserEdit = () => {
       ...formState.selectedItems[type as keyof UserFormState['selectedItems']],
       newItem,
     ]
-    setFormState((prev) => ({
-      ...prev,
-      selectedItems: {
-        ...prev.selectedItems,
-        [type]: updatedItems,
-      },
-      [type]:
-        type === 'depositors'
-          ? ''
-          : {
-              ...(prev[type as keyof UserFormState] as Record<string, string>),
-              [Object.keys(prev[type as keyof UserFormState]).pop() || '']: '',
-            },
-    }))
+
+    setFormState((prev) => {
+      let newSectionState: (typeof prev)[keyof UserFormState] =
+        prev[type as keyof UserFormState]
+      if (type !== 'depositors') {
+        const section = sections.find((s) => s.formStateSection === type)
+        if (section) {
+          const lastField = section.fieldNames[section.fieldNames.length - 1]
+          newSectionState = {
+            ...(prev[type as keyof UserFormState] as FormSection),
+            [lastField]: '',
+          } as (typeof prev)[keyof UserFormState]
+        }
+      } else {
+        newSectionState = ''
+      }
+
+      return {
+        ...prev,
+        selectedItems: {
+          ...prev.selectedItems,
+          [type]: updatedItems,
+        },
+        [type]: newSectionState,
+      }
+    })
+
     setEditUser((prev) => ({
       ...prev,
       [type]: updatedItems.join(';'),
@@ -204,31 +228,26 @@ export const UserEdit = () => {
     }))
   }
 
-  const sections: {
-    title: string
-    tooltip: string
-    formStateSection: keyof UserFormState
-    fieldNames: string[]
-  }[] = [
+  const sections = [
     {
       title: 'Arkivbildare',
       tooltip:
         'Ange arkivbildare användaren ska kunna se i läsesalen. Allt material för en arkivbildare som anges här kommer vara åtkomligt för användaren.',
-      formStateSection: 'archiveInitiators',
+      formStateSection: FormSectionKey.archiveInitiators,
       fieldNames: ['depositor', 'archiveInitiator'],
     },
     {
       title: 'Serier',
       tooltip:
         'Ange serier användaren ska kunna se i läsesalen. Välj först en deponent och ett arkiv, skriv sedan in serienamnet. Tryck Enter för att lägga till serien.',
-      formStateSection: 'series',
+      formStateSection: FormSectionKey.series,
       fieldNames: ['depositor', 'archiveInitiator', 'seriesName'],
     },
     {
       title: 'Volymer',
       tooltip:
         'Ange volymer användaren ska kunna se i läsesalen. Välj först en deponent, ett arkiv och en serie, skriv sedan in volymnamnet. Tryck Enter för att lägga till volymen.',
-      formStateSection: 'volumes',
+      formStateSection: FormSectionKey.volumes,
       fieldNames: ['depositor', 'archiveInitiator', 'seriesName', 'volume'],
     },
   ]

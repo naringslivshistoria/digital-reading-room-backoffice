@@ -1,38 +1,37 @@
-import { useMemo } from 'react'
-
 import { useFieldOptions } from './useFieldOptions'
 import { FilteredOptionsProps } from '../../../common/types'
 
 export const useFilteredOptions = ({
   fieldName,
+  fieldNames,
   filterFieldName,
   filterValue,
   selectedItems,
-  levelIndex,
   currentValue,
-}: FilteredOptionsProps): string[] => {
+}: FilteredOptionsProps) => {
   const options = useFieldOptions(
     fieldName,
     filterValue ? `${filterFieldName}::${filterValue}` : undefined
   )
 
-  return useMemo(() => {
-    let filteredOptions = [...options]
+  const levelIndex = fieldNames.indexOf(fieldName)
+  let filteredOptions = [...options]
 
-    if (fieldName === 'seriesName' || fieldName === 'volume') {
-      const filteredItems = selectedItems
-        .map((item) => item.split('>')[levelIndex])
-        .filter((item) => item && item !== currentValue)
+  const isLastField = levelIndex === fieldNames.length - 1
 
-      filteredOptions = filteredOptions.filter(
-        (option) => !filteredItems.includes(option)
-      )
-    }
+  if (isLastField) {
+    const filteredItems = selectedItems
+      .map((item) => item.split('>')[levelIndex])
+      .filter((item) => item && item !== currentValue)
 
-    if (currentValue && !filteredOptions.includes(currentValue)) {
-      filteredOptions.push(currentValue)
-    }
+    filteredOptions = filteredOptions.filter(
+      (option) => !filteredItems.includes(option)
+    )
+  }
 
-    return filteredOptions
-  }, [options, selectedItems, levelIndex, currentValue, fieldName])
+  if (currentValue && !filteredOptions.includes(currentValue)) {
+    filteredOptions.push(currentValue)
+  }
+
+  return filteredOptions
 }

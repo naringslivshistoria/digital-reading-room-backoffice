@@ -68,8 +68,7 @@ const UserToolbar = ({
             user: {
               username: '',
               role: 'User',
-              depositors:
-                'Centrum för Näringslivshistoria;Föreningen Stockholms Företagsminnen',
+              depositors: 'Föreningen Stockholms Företagsminnen',
             },
             allGroups,
           }}

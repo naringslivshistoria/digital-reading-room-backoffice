@@ -17,18 +17,22 @@ export const useFilteredOptions = ({
   )
 
   return useMemo(() => {
-    const filteredItems = selectedItems
-      .map((item) => item.split('>')[levelIndex])
-      .filter((item) => item && item !== currentValue)
+    let filteredOptions = [...options]
 
-    const filteredOptions = options.filter(
-      (option) => !filteredItems.includes(option)
-    )
+    if (fieldName === 'seriesName' || fieldName === 'volume') {
+      const filteredItems = selectedItems
+        .map((item) => item.split('>')[levelIndex])
+        .filter((item) => item && item !== currentValue)
+
+      filteredOptions = filteredOptions.filter(
+        (option) => !filteredItems.includes(option)
+      )
+    }
 
     if (currentValue && !filteredOptions.includes(currentValue)) {
       filteredOptions.push(currentValue)
     }
 
     return filteredOptions
-  }, [options, selectedItems, levelIndex, currentValue])
+  }, [options, selectedItems, levelIndex, currentValue, fieldName])
 }

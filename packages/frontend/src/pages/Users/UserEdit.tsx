@@ -404,14 +404,33 @@ export const UserEdit = () => {
               <Autocomplete
                 multiple
                 freeSolo
+                clearOnBlur
+                selectOnFocus
                 options={allGroups || []}
                 value={selectedGroups}
-                onChange={(event, newValue) =>
-                  handleGroupsChange(event, newValue)
-                }
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
+                onChange={(event, newValue) => {
+                  if (newValue.length < selectedGroups.length) {
+                    handleGroupsChange(null, newValue)
+                    return
+                  }
+
+                  const lastValue = newValue[newValue.length - 1]
+                  if (lastValue?.trim().length > 1) {
+                    const validGroups = newValue
+                      .filter(Boolean)
+                      .map((group) => group.trim())
+                      .filter((group) => group.length > 1)
+                    handleGroupsChange(null, validGroups)
+                  }
+                }}
+                onBlur={(event) => {
+                  const inputValue = (event.target as HTMLInputElement).value
+                  if (inputValue?.trim().length > 1) {
+                    const validGroups = [
+                      ...selectedGroups.filter((g) => g !== inputValue),
+                      inputValue.trim(),
+                    ]
+                    handleGroupsChange(null, validGroups)
                   }
                 }}
                 renderTags={(value: readonly string[], getTagProps) =>
@@ -427,12 +446,11 @@ export const UserEdit = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Skriv in grupper och tryck Enter"
+                    label="Välj eller skapa grupper"
                     placeholder="Skriv grupp..."
                   />
                 )}
                 fullWidth
-                noOptionsText="Skriv in grupp och tryck Enter"
               />
             </Grid>
             <Grid
@@ -525,9 +543,32 @@ export const UserEdit = () => {
               <Autocomplete
                 multiple
                 freeSolo
+                clearOnBlur
+                selectOnFocus
                 options={[]}
                 value={formState.selectedItems.fileNames}
-                onChange={(event, newValue) => handleFileNamesChange(newValue)}
+                onChange={(event, newValue) => {
+                  if (
+                    newValue.length < formState.selectedItems.fileNames.length
+                  ) {
+                    handleFileNamesChange(newValue)
+                    return
+                  }
+
+                  const lastValue = newValue[newValue.length - 1]
+                  if (lastValue?.trim().length > 1) {
+                    handleFileNamesChange(newValue)
+                  }
+                }}
+                onBlur={(event) => {
+                  const inputValue = (event.target as HTMLInputElement).value
+                  if (inputValue?.trim().length > 1) {
+                    handleFileNamesChange([
+                      ...formState.selectedItems.fileNames,
+                      inputValue.trim(),
+                    ])
+                  }
+                }}
                 renderTags={(value: readonly string[], getTagProps) =>
                   value.map((option, index) => (
                     // eslint-disable-next-line react/jsx-key
@@ -541,8 +582,8 @@ export const UserEdit = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Lägg till dokument"
-                    placeholder="Skriv filnamn och tryck Enter..."
+                    label="Lägg till filer"
+                    placeholder="Skriv filnamn..."
                   />
                 )}
                 fullWidth

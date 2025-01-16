@@ -247,9 +247,27 @@ export const BatchEdit = () => {
             <Autocomplete
               multiple
               freeSolo
+              clearOnBlur
+              selectOnFocus
               options={allGroups || []}
               value={selectedValues}
-              onChange={(_, newValue) => setSelectedValues(newValue)}
+              onChange={(_, newValue) => {
+                if (newValue.length < selectedValues.length) {
+                  setSelectedValues(newValue)
+                  return
+                }
+
+                const lastValue = newValue[newValue.length - 1]
+                if (lastValue?.trim().length > 1) {
+                  setSelectedValues(newValue)
+                }
+              }}
+              onBlur={(event) => {
+                const inputValue = (event.target as HTMLInputElement).value
+                if (inputValue?.trim().length > 1) {
+                  setSelectedValues([...selectedValues, inputValue.trim()])
+                }
+              }}
               renderTags={(value: readonly string[], getTagProps) =>
                 value.map((option, index) => (
                   <Chip
@@ -337,8 +355,26 @@ export const BatchEdit = () => {
               multiple
               options={editType === 'fileNames' ? [] : depositorOptions}
               freeSolo={editType === 'fileNames'}
+              clearOnBlur
+              selectOnFocus
               value={selectedValues}
-              onChange={(_, newValue) => setSelectedValues(newValue)}
+              onChange={(_, newValue) => {
+                if (newValue.length < selectedValues.length) {
+                  setSelectedValues(newValue)
+                  return
+                }
+
+                const lastValue = newValue[newValue.length - 1]
+                if (lastValue?.trim().length > 1) {
+                  setSelectedValues(newValue)
+                }
+              }}
+              onBlur={(event) => {
+                const inputValue = (event.target as HTMLInputElement).value
+                if (inputValue?.trim().length > 1) {
+                  setSelectedValues([...selectedValues, inputValue.trim()])
+                }
+              }}
               renderTags={(value: readonly string[], getTagProps) =>
                 value.map((option, index) => (
                   <Chip
@@ -352,8 +388,12 @@ export const BatchEdit = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Välj värden"
-                  placeholder="Sök..."
+                  label={
+                    editType === 'fileNames' ? 'Lägg till filer' : 'Välj värden'
+                  }
+                  placeholder={
+                    editType === 'fileNames' ? 'Skriv filnamn...' : 'Sök...'
+                  }
                 />
               )}
               fullWidth

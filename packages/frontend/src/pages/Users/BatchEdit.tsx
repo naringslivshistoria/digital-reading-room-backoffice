@@ -432,8 +432,12 @@ export const BatchEdit = () => {
         </Link>
       </Box>
       <Typography variant="h2">Ändrar {getTitle().toLowerCase()}</Typography>
+      <Typography variant="body1" sx={{ mb: 4 }}>
+        Redigerar <strong>{users.length}</strong> användare
+      </Typography>
       <Typography variant="body1" sx={{ mt: 2, mb: 4 }}>
-        Redigerar {users.length} användare
+        Ändringar kommer att skriva över alla markerade användares värden för
+        den valda batch-redigeringen.
       </Typography>
 
       <Grid container spacing={4} columnSpacing={4} rowSpacing={4}>

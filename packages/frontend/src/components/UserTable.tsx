@@ -14,6 +14,7 @@ import {
 import { Link } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import Checkbox from '@mui/material/Checkbox'
 
 import { UserTableProps } from '../common/types'
 
@@ -31,6 +32,8 @@ const UserTable = ({
   showGrid,
   expandedGroup,
   allGroups,
+  selectedUsers,
+  onUserSelect,
 }: UserTableProps) => {
   const currentPage = group ? pageByGroup?.[group] || 0 : page
   const startIndex = currentPage * rowsPerPage
@@ -42,11 +45,39 @@ const UserTable = ({
     (column) => !isMobile || !column.hideOnMobile
   )
 
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      users.forEach((user) => {
+        if (user.id) {
+          onUserSelect(user.id)
+        }
+      })
+    } else {
+      users.forEach((user) => {
+        if (user.id) {
+          onUserSelect(user.id)
+        }
+      })
+    }
+  }
+
   return (
     <>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
+            <TableCell padding="checkbox">
+              <Checkbox
+                onChange={handleSelectAll}
+                checked={users.every(
+                  (user) => user.id && selectedUsers.has(user.id)
+                )}
+                indeterminate={
+                  users.some((user) => user.id && selectedUsers.has(user.id)) &&
+                  !users.every((user) => user.id && selectedUsers.has(user.id))
+                }
+              />
+            </TableCell>
             {visibleColumns.map((column) => (
               <TableCell
                 key={column.id}
@@ -67,6 +98,12 @@ const UserTable = ({
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={user.id ? selectedUsers.has(user.id) : false}
+                  onChange={() => user.id && onUserSelect(user.id)}
+                />
+              </TableCell>
               {visibleColumns.map((column) => (
                 <TableCell key={column.id} align={column.align || 'left'}>
                   {column.id === 'groups' ? (

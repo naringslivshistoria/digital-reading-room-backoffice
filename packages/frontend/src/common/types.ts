@@ -71,8 +71,8 @@ export enum Role {
 interface ItemSelectorProps {
   depositorValue: string
   onDepositorChange: (value: string) => void
-  archiveValue: string
-  onArchiveChange: (value: string) => void
+  archiveInitiatorValue: string
+  onArchiveInitiatorChange: (value: string) => void
   depositorOptions: string[]
   archiveOptions: string[]
   seriesOptions?: string[]
@@ -85,18 +85,25 @@ interface ItemSelectorProps {
   disabled?: boolean
 }
 
+export enum FormSectionKey {
+  depositors = 'depositors',
+  archiveInitiators = 'archiveInitiators',
+  series = 'series',
+  volumes = 'volumes',
+}
+
 interface ItemSectionProps {
   title: string
   tooltip: string
-  formStateSection: keyof UserFormState
+  formStateSection: FormSectionKey
   formState: UserFormState
   handleFormChange: (
-    section: keyof UserFormState,
+    section: FormSectionKey | keyof UserFormState,
     field: string,
     value: string
   ) => void
   handleAddItem: (type: keyof UserFormState) => void
-  handleRemoveItem: (type: keyof UserFormState, itemToRemove: string) => void
+  handleRemoveItem: (type: FormSectionKey, itemToRemove: string) => void
   section: {
     fieldNames: string[]
   }
@@ -112,17 +119,17 @@ interface UserFormState {
   depositors: string
   archiveInitiators: {
     depositor: string
-    archive: string
+    archiveInitiator: string
   }
   series: {
     depositor: string
-    archive: string
-    series: string
+    archiveInitiator: string
+    seriesName: string
   }
   volumes: {
     depositor: string
-    archive: string
-    series: string
+    archiveInitiator: string
+    seriesName: string
     volume: string
   }
   selectedItems: {
@@ -156,6 +163,8 @@ interface UserTableProps {
   showGrid: boolean
   expandedGroup: string | null
   allGroups: string[]
+  selectedUsers: Set<string>
+  onUserSelect: (userId: string) => void
 }
 
 interface UserToolbarProps {
@@ -164,15 +173,24 @@ interface UserToolbarProps {
   onSearchChange: (value: string) => void
   onDisplayModeChange: (grid: boolean) => void
   allGroups: string[]
+  selectedUsers: Set<string>
+  onBatchAction: (action: string) => void
 }
 
 interface FilteredOptionsProps {
   fieldName: string
+  fieldNames: string[]
   filterFieldName: string
   filterValue: string | undefined
   selectedItems: string[]
-  levelIndex: number
   currentValue: string
+}
+
+interface FormSection {
+  depositor: string
+  archiveInitiator: string
+  seriesName?: string
+  volume?: string
 }
 
 export type {
@@ -190,4 +208,5 @@ export type {
   UserTableProps,
   UserToolbarProps,
   FilteredOptionsProps,
+  FormSection,
 }

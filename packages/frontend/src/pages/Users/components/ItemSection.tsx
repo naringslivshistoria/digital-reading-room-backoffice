@@ -23,39 +23,39 @@ export const ItemSection = ({
       formStateSection as keyof UserFormState['selectedItems']
     ]
 
-  const archiveOptions = useFilteredOptions({
+  const archiveInitiatorOptions = useFilteredOptions({
     fieldName: 'archiveInitiator',
+    fieldNames: section.fieldNames,
     filterFieldName: 'depositor',
     filterValue: sectionFormState.depositor,
     selectedItems,
-    levelIndex: 1,
-    currentValue: sectionFormState.archive,
+    currentValue: sectionFormState.archiveInitiator,
   })
 
-  const seriesOptions = useFilteredOptions({
+  const rawSeriesOptions = useFilteredOptions({
     fieldName: 'seriesName',
+    fieldNames: section.fieldNames,
     filterFieldName: 'archiveInitiator',
-    filterValue: sectionFormState.archive,
+    filterValue: sectionFormState.archiveInitiator,
     selectedItems,
-    levelIndex: 2,
-    currentValue: sectionFormState.series,
+    currentValue: sectionFormState.seriesName,
   })
 
-  const volumeOptions = useFilteredOptions({
+  const rawVolumeOptions = useFilteredOptions({
     fieldName: 'volume',
+    fieldNames: section.fieldNames,
     filterFieldName: 'seriesName',
-    filterValue: sectionFormState.series,
+    filterValue: sectionFormState.seriesName,
     selectedItems,
-    levelIndex: 3,
     currentValue: sectionFormState.volume,
   })
 
-  const filteredSeriesOptions = section.fieldNames.includes('seriesName')
-    ? seriesOptions
+  const seriesOptions = section.fieldNames.includes('seriesName')
+    ? rawSeriesOptions
     : undefined
 
-  const filteredVolumeOptions = section.fieldNames.includes('volume')
-    ? volumeOptions
+  const volumeOptions = section.fieldNames.includes('volume')
+    ? rawVolumeOptions
     : undefined
 
   const disabled = Object.values(sectionFormState).some((v) => !v)
@@ -74,22 +74,22 @@ export const ItemSection = ({
           onDepositorChange={(value) =>
             handleFormChange(formStateSection, 'depositor', value)
           }
-          archiveValue={sectionFormState.archive}
-          onArchiveChange={(value) =>
-            handleFormChange(formStateSection, 'archive', value)
+          archiveInitiatorValue={sectionFormState.archiveInitiator}
+          onArchiveInitiatorChange={(value) =>
+            handleFormChange(formStateSection, 'archiveInitiator', value)
           }
-          seriesValue={sectionFormState.series}
+          seriesValue={sectionFormState.seriesName}
           onSeriesChange={(value) =>
-            handleFormChange(formStateSection, 'series', value)
+            handleFormChange(formStateSection, 'seriesName', value)
           }
           volumeValue={sectionFormState.volume}
           onVolumeChange={(value) =>
             handleFormChange(formStateSection, 'volume', value)
           }
           depositorOptions={depositorOptions}
-          archiveOptions={archiveOptions}
-          seriesOptions={filteredSeriesOptions}
-          volumeOptions={filteredVolumeOptions}
+          archiveOptions={archiveInitiatorOptions}
+          seriesOptions={seriesOptions}
+          volumeOptions={volumeOptions}
           onAdd={() => handleAddItem(formStateSection)}
           disabled={disabled}
         />

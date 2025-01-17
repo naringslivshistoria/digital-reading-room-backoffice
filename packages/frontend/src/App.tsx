@@ -21,6 +21,7 @@ import Imports from './pages/Imports/Imports'
 import ImportDetails from './pages/Imports/ImportDetails'
 import { CreateImport } from './pages/Imports/CreateImport'
 import { DeleteLevels } from './pages/Imports/DeleteLevels'
+import { BatchEdit } from './pages/Users/BatchEdit'
 
 const publicoTextItalic = {
   fontFamily: 'publicoTextItalic',
@@ -203,6 +204,7 @@ function App() {
                   path="/deletelevels"
                   element={<DeleteLevels></DeleteLevels>}
                 />
+                <Route path="/users/batch-edit" element={<BatchEdit />} />
               </Routes>
               <Grid item xs={1} />
             </Grid>

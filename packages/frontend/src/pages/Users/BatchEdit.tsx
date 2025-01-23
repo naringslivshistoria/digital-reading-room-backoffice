@@ -270,8 +270,8 @@ export const BatchEdit = () => {
               }}
               renderTags={(value: readonly string[], getTagProps) =>
                 value.map((option, index) => (
+                  // eslint-disable-next-line react/jsx-key
                   <Chip
-                    key={option}
                     variant="outlined"
                     label={option}
                     {...getTagProps({ index })}
@@ -377,8 +377,8 @@ export const BatchEdit = () => {
               }}
               renderTags={(value: readonly string[], getTagProps) =>
                 value.map((option, index) => (
+                  // eslint-disable-next-line react/jsx-key
                   <Chip
-                    key={option}
                     variant="outlined"
                     label={option}
                     {...getTagProps({ index })}

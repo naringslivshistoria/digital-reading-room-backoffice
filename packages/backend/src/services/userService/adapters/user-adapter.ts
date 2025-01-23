@@ -2,6 +2,7 @@ import knex from 'knex'
 import config from '../../../common/config'
 import { User } from '../../../common/types'
 import axios from 'axios'
+import hash from '../../../services/authenticationService/hash'
 
 const db = knex({
   client: 'pg',
@@ -63,15 +64,20 @@ const getUser = async (id: string) => {
 
 const updateUser = async (user: User) => {
   let id: string
+  const { password, ...userWithoutPassword } = user
+
+  if (password) {
+    const saltAndHash = await hash.createSaltAndHash(password)
+    userWithoutPassword.salt = saltAndHash.salt
+    userWithoutPassword.password_hash = saltAndHash.password
+  }
 
   if (user.id) {
     id = user.id
-    await db('users').update(user).where('id', id)
+    await db('users').update(userWithoutPassword).where('id', id)
   } else {
     try {
-      id = await db('users')
-        .insert({ ...user, salt: '', password_hash: '' })
-        .returning('id')
+      id = await db('users').insert(userWithoutPassword).returning('id')
     } catch (error: unknown) {
       if (!(error instanceof Error)) {
         throw error

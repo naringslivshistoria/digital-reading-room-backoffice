@@ -6,8 +6,8 @@ import { ItemSelectorProps } from '../../../common/types'
 export const ItemSelector = ({
   depositorValue,
   onDepositorChange,
-  archiveValue,
-  onArchiveChange,
+  archiveInitiatorValue,
+  onArchiveInitiatorChange,
   seriesValue,
   onSeriesChange,
   volumeValue,
@@ -31,8 +31,8 @@ export const ItemSelector = ({
     {
       label: 'Välj arkivbildare',
       placeholder: 'Sök arkivbildare...',
-      value: archiveValue,
-      onChange: onArchiveChange,
+      value: archiveInitiatorValue,
+      onChange: onArchiveInitiatorChange,
       options: archiveOptions,
       disabled: !depositorValue || archiveOptions.length === 0,
     },
@@ -45,7 +45,7 @@ export const ItemSelector = ({
       value: seriesValue || '',
       onChange: onSeriesChange,
       options: seriesOptions,
-      disabled: !archiveValue || seriesOptions.length === 0,
+      disabled: !archiveInitiatorValue || seriesOptions.length === 0,
     })
   }
 

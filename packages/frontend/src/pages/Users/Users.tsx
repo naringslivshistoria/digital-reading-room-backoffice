@@ -12,7 +12,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useConfirm } from 'material-ui-confirm'
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUsers } from './hooks/useUsers'
@@ -27,6 +27,7 @@ const Users = () => {
   const confirm = useConfirm()
   const deleteUserMutation = useDeleteUser()
   const location = useLocation()
+  const navigate = useNavigate()
   const [showGrid, setShowGrid] = useState<boolean>(
     location.state?.showGrid ?? true
   )
@@ -37,6 +38,7 @@ const Users = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [pageByGroup, setPageByGroup] = useState<{ [key: string]: number }>({})
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const allGroups =
     data?.users?.reduce((acc: string[], user: User) => {
       if (!user.groups) {
@@ -153,6 +155,33 @@ const Users = () => {
     setPageByGroup({})
   }
 
+  const handleUserSelect = (userId: string) => {
+    setSelectedUsers((prev) => {
+      const newSelected = new Set(prev)
+      if (newSelected.has(userId)) {
+        newSelected.delete(userId)
+      } else {
+        newSelected.add(userId)
+      }
+      return newSelected
+    })
+  }
+
+  const handleBatchAction = (action: string) => {
+    if (action && selectedUsers.size > 0 && data?.users) {
+      const selectedUserObjects = data.users.filter(
+        (user) => user.id && selectedUsers.has(user.id)
+      )
+      navigate('/users/batch-edit', {
+        state: {
+          users: selectedUserObjects,
+          editType: action,
+          allGroups,
+        },
+      })
+    }
+  }
+
   return (
     <>
       <Grid item md={10} xs={10} sx={{ paddingTop: 10 }}>
@@ -163,13 +192,24 @@ const Users = () => {
           display={'block'}
           sx={{ marginBottom: '40px' }}
         >
-          <UserToolbar
-            showGrid={showGrid}
-            searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            onDisplayModeChange={setShowGrid}
-            allGroups={allGroups}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="h2">Administrera användare</Typography>
+            <UserToolbar
+              showGrid={showGrid}
+              searchQuery={searchQuery}
+              onSearchChange={handleSearchChange}
+              onDisplayModeChange={setShowGrid}
+              allGroups={allGroups}
+              selectedUsers={selectedUsers}
+              onBatchAction={handleBatchAction}
+            />
+          </Box>
 
           <Typography variant="body2">
             {data == null && isLoading
@@ -243,6 +283,8 @@ const Users = () => {
                             <UserTable
                               users={users}
                               availableColumns={availableColumns}
+                              selectedUsers={selectedUsers}
+                              onUserSelect={handleUserSelect}
                               page={page}
                               rowsPerPage={rowsPerPage}
                               group={group}
@@ -272,6 +314,8 @@ const Users = () => {
                   <UserTable
                     users={filterUsers(data.users)}
                     availableColumns={availableColumns}
+                    selectedUsers={selectedUsers}
+                    onUserSelect={handleUserSelect}
                     page={page}
                     rowsPerPage={rowsPerPage}
                     handleGroupClick={handleGroupClick}

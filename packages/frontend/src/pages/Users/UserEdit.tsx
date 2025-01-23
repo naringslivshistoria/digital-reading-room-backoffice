@@ -15,15 +15,24 @@ import {
   Autocomplete,
   Chip,
   Tooltip,
+  IconButton,
+  InputAdornment,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import InfoIcon from '@mui/icons-material/Info'
+import Password from '@mui/icons-material/Password'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
-import { Role, User, UserFormState } from '../../common/types'
+import {
+  Role,
+  User,
+  UserFormState,
+  FormSection,
+  FormSectionKey,
+} from '../../common/types'
 import { ItemSection } from './components/ItemSection'
 import { useFieldOptions } from './hooks/useFieldOptions'
 
@@ -34,11 +43,17 @@ export const UserEdit = () => {
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
   const [error, setError] = useState<string | null>(null)
+
   const [formState, setFormState] = useState<UserFormState>({
     depositors: '',
-    archiveInitiators: { depositor: '', archive: '' },
-    series: { depositor: '', archive: '', series: '' },
-    volumes: { depositor: '', archive: '', series: '', volume: '' },
+    archiveInitiators: { depositor: '', archiveInitiator: '' },
+    series: { depositor: '', archiveInitiator: '', seriesName: '' },
+    volumes: {
+      depositor: '',
+      archiveInitiator: '',
+      seriesName: '',
+      volume: '',
+    },
     selectedItems: {
       depositors:
         location.state.user.depositors?.split(';').filter(Boolean) || [],
@@ -50,6 +65,7 @@ export const UserEdit = () => {
         location.state.user.fileNames?.split(';').filter(Boolean) || [],
     },
   })
+
   const allGroups = location.state.allGroups
   const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
     const userGroups = location.state.user.groups
@@ -67,29 +83,31 @@ export const UserEdit = () => {
 
     return Array.isArray(userGroups) ? userGroups : []
   })
+  const [formErrors, setFormErrors] = useState({
+    username: '',
+    password: '',
+  })
 
   const handleFormChange = (
     section: keyof UserFormState,
     field: string,
     value: string
   ) => {
-    setFormState((prev) => ({
-      ...prev,
-      [section]:
-        typeof prev[section] === 'object'
-          ? {
-              ...Object.fromEntries(
-                Object.entries(prev[section] as Record<string, string>).map(
-                  ([key, currentValue], index, array) => {
-                    const fieldIndex = array.findIndex(([k]) => k === field)
-                    return [key, index <= fieldIndex ? currentValue : '']
-                  }
-                )
-              ),
-              [field]: value,
-            }
-          : value,
-    }))
+    const sectionDef = sections.find((s) => s.formStateSection === section)
+    if (sectionDef && typeof formState[section] === 'object') {
+      const fieldIndex = sectionDef.fieldNames.indexOf(field)
+      setFormState((prev) => {
+        const newSectionState = { ...(prev[section] as Record<string, string>) }
+        newSectionState[field] = value
+        for (let i = fieldIndex + 1; i < sectionDef.fieldNames.length; i++) {
+          const f = sectionDef.fieldNames[i]
+          newSectionState[f] = ''
+        }
+        return { ...prev, [section]: newSectionState }
+      })
+    } else {
+      setFormState((prev) => ({ ...prev, [section]: value }))
+    }
   }
 
   const handleAddItem = (type: string) => {
@@ -117,20 +135,33 @@ export const UserEdit = () => {
       ...formState.selectedItems[type as keyof UserFormState['selectedItems']],
       newItem,
     ]
-    setFormState((prev) => ({
-      ...prev,
-      selectedItems: {
-        ...prev.selectedItems,
-        [type]: updatedItems,
-      },
-      [type]:
-        type === 'depositors'
-          ? ''
-          : {
-              ...(prev[type as keyof UserFormState] as Record<string, string>),
-              [Object.keys(prev[type as keyof UserFormState]).pop() || '']: '',
-            },
-    }))
+
+    setFormState((prev) => {
+      let newSectionState: (typeof prev)[keyof UserFormState] =
+        prev[type as keyof UserFormState]
+      if (type !== 'depositors') {
+        const section = sections.find((s) => s.formStateSection === type)
+        if (section) {
+          const lastField = section.fieldNames[section.fieldNames.length - 1]
+          newSectionState = {
+            ...(prev[type as keyof UserFormState] as FormSection),
+            [lastField]: '',
+          } as (typeof prev)[keyof UserFormState]
+        }
+      } else {
+        newSectionState = ''
+      }
+
+      return {
+        ...prev,
+        selectedItems: {
+          ...prev.selectedItems,
+          [type]: updatedItems,
+        },
+        [type]: newSectionState,
+      }
+    })
+
     setEditUser((prev) => ({
       ...prev,
       [type]: updatedItems.join(';'),
@@ -171,9 +202,35 @@ export const UserEdit = () => {
     }))
   }
 
+  const validateForm = () => {
+    const errors = {
+      username: '',
+      password: '',
+    }
+
+    if (!editUser.username?.trim()) {
+      errors.username = 'Användarnamn måste anges'
+    }
+
+    if (!editUser.password?.trim() && isNewUser) {
+      errors.password = 'Lösenord måste anges'
+    } else if (editUser.password && editUser.password.length < 6) {
+      errors.password = 'Lösenord måste vara minst 6 tecken långt'
+    }
+
+    setFormErrors(errors)
+    return !Object.values(errors).some((error) => error)
+  }
+
   const saveUser = async () => {
     if (editUser) {
       setError(null)
+
+      if (!validateForm()) {
+        console.log('form errors', formErrors)
+        return
+      }
+
       try {
         const userToSave = {
           ...editUser,
@@ -204,34 +261,36 @@ export const UserEdit = () => {
     }))
   }
 
-  const sections: {
-    title: string
-    tooltip: string
-    formStateSection: keyof UserFormState
-    fieldNames: string[]
-  }[] = [
+  const sections = [
     {
       title: 'Arkivbildare',
       tooltip:
         'Ange arkivbildare användaren ska kunna se i läsesalen. Allt material för en arkivbildare som anges här kommer vara åtkomligt för användaren.',
-      formStateSection: 'archiveInitiators',
+      formStateSection: FormSectionKey.archiveInitiators,
       fieldNames: ['depositor', 'archiveInitiator'],
     },
     {
       title: 'Serier',
       tooltip:
         'Ange serier användaren ska kunna se i läsesalen. Välj först en deponent och ett arkiv, skriv sedan in serienamnet. Tryck Enter för att lägga till serien.',
-      formStateSection: 'series',
+      formStateSection: FormSectionKey.series,
       fieldNames: ['depositor', 'archiveInitiator', 'seriesName'],
     },
     {
       title: 'Volymer',
       tooltip:
         'Ange volymer användaren ska kunna se i läsesalen. Välj först en deponent, ett arkiv och en serie, skriv sedan in volymnamnet. Tryck Enter för att lägga till volymen.',
-      formStateSection: 'volumes',
+      formStateSection: FormSectionKey.volumes,
       fieldNames: ['depositor', 'archiveInitiator', 'seriesName', 'volume'],
     },
   ]
+
+  const generatePassword = () => {
+    const newPassword = Math.random().toString(36).slice(-8)
+    setEditUser((prev) => ({ ...prev, password: newPassword }))
+  }
+
+  const isNewUser = !location.state?.user?.username
 
   return (
     editUser && (
@@ -249,7 +308,9 @@ export const UserEdit = () => {
             </Link>
           </Box>
           <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
-          <Typography variant="h2">Administrera användare</Typography>
+          <Typography variant="h2">
+            {isNewUser ? 'Skapa användare' : 'Administrera användare'}
+          </Typography>
           <Grid
             container
             columnSpacing={4}
@@ -269,7 +330,7 @@ export const UserEdit = () => {
                 <InfoIcon color="action" />
               </Tooltip>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
               <TextField
                 id="username"
                 label="Användarnamn (epostadress)"
@@ -278,10 +339,36 @@ export const UserEdit = () => {
                 onChange={(event) =>
                   setEditUser({ ...editUser, username: event.target.value })
                 }
+                error={!!formErrors.username}
+                helperText={formErrors.username}
                 fullWidth
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
+              <TextField
+                id="password"
+                label={isNewUser ? 'Ange lösenord' : 'Ange nytt lösenord'}
+                variant="outlined"
+                value={editUser.password}
+                onChange={(event) =>
+                  setEditUser({ ...editUser, password: event.target.value })
+                }
+                error={!!formErrors.password}
+                helperText={formErrors.password}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={generatePassword}>
+                        <Password />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={2}>
               <FormControl fullWidth>
                 <InputLabel id="role-label">Användartyp</InputLabel>
                 <Select
@@ -317,14 +404,33 @@ export const UserEdit = () => {
               <Autocomplete
                 multiple
                 freeSolo
+                clearOnBlur
+                selectOnFocus
                 options={allGroups || []}
                 value={selectedGroups}
-                onChange={(event, newValue) =>
-                  handleGroupsChange(event, newValue)
-                }
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
+                onChange={(event, newValue) => {
+                  if (newValue.length < selectedGroups.length) {
+                    handleGroupsChange(null, newValue)
+                    return
+                  }
+
+                  const lastValue = newValue[newValue.length - 1]
+                  if (lastValue?.trim().length > 1) {
+                    const validGroups = newValue
+                      .filter(Boolean)
+                      .map((group) => group.trim())
+                      .filter((group) => group.length > 1)
+                    handleGroupsChange(null, validGroups)
+                  }
+                }}
+                onBlur={(event) => {
+                  const inputValue = (event.target as HTMLInputElement).value
+                  if (inputValue?.trim().length > 1) {
+                    const validGroups = [
+                      ...selectedGroups.filter((g) => g !== inputValue),
+                      inputValue.trim(),
+                    ]
+                    handleGroupsChange(null, validGroups)
                   }
                 }}
                 renderTags={(value: readonly string[], getTagProps) =>
@@ -340,12 +446,11 @@ export const UserEdit = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Skriv in grupper och tryck Enter"
+                    label="Välj eller skapa grupper"
                     placeholder="Skriv grupp..."
                   />
                 )}
                 fullWidth
-                noOptionsText="Skriv in grupp och tryck Enter"
               />
             </Grid>
             <Grid
@@ -438,9 +543,32 @@ export const UserEdit = () => {
               <Autocomplete
                 multiple
                 freeSolo
+                clearOnBlur
+                selectOnFocus
                 options={[]}
                 value={formState.selectedItems.fileNames}
-                onChange={(event, newValue) => handleFileNamesChange(newValue)}
+                onChange={(event, newValue) => {
+                  if (
+                    newValue.length < formState.selectedItems.fileNames.length
+                  ) {
+                    handleFileNamesChange(newValue)
+                    return
+                  }
+
+                  const lastValue = newValue[newValue.length - 1]
+                  if (lastValue?.trim().length > 1) {
+                    handleFileNamesChange(newValue)
+                  }
+                }}
+                onBlur={(event) => {
+                  const inputValue = (event.target as HTMLInputElement).value
+                  if (inputValue?.trim().length > 1) {
+                    handleFileNamesChange([
+                      ...formState.selectedItems.fileNames,
+                      inputValue.trim(),
+                    ])
+                  }
+                }}
                 renderTags={(value: readonly string[], getTagProps) =>
                   value.map((option, index) => (
                     // eslint-disable-next-line react/jsx-key
@@ -454,8 +582,8 @@ export const UserEdit = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Lägg till dokument"
-                    placeholder="Skriv filnamn och tryck Enter..."
+                    label="Lägg till filer"
+                    placeholder="Skriv filnamn..."
                   />
                 )}
                 fullWidth

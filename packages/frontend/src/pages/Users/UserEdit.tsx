@@ -214,8 +214,8 @@ export const UserEdit = () => {
 
     if (!editUser.password?.trim() && isNewUser) {
       errors.password = 'Lösenord måste anges'
-    } else if (editUser.password && editUser.password.length < 6) {
-      errors.password = 'Lösenord måste vara minst 6 tecken långt'
+    } else if (editUser.password && editUser.password.length < 8) {
+      errors.password = 'Lösenord måste vara minst 8 tecken långt'
     }
 
     setFormErrors(errors)

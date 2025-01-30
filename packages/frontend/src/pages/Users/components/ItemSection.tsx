@@ -29,7 +29,6 @@ export const ItemSection = ({
     filterFieldName: 'depositor',
     filterValue: sectionFormState.depositor,
     selectedItems,
-    currentValue: sectionFormState.archiveInitiator,
   })
 
   const rawSeriesOptions = useFilteredOptions({
@@ -38,7 +37,6 @@ export const ItemSection = ({
     filterFieldName: 'archiveInitiator',
     filterValue: sectionFormState.archiveInitiator,
     selectedItems,
-    currentValue: sectionFormState.seriesName,
   })
 
   const rawVolumeOptions = useFilteredOptions({
@@ -47,7 +45,6 @@ export const ItemSection = ({
     filterFieldName: 'seriesName',
     filterValue: sectionFormState.seriesName,
     selectedItems,
-    currentValue: sectionFormState.volume,
   })
 
   const seriesOptions = section.fieldNames.includes('seriesName')

@@ -183,7 +183,6 @@ interface FilteredOptionsProps {
   filterFieldName: string
   filterValue: string | undefined
   selectedItems: string[]
-  currentValue: string
 }
 
 interface FormSection {

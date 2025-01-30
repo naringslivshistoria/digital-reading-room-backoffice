@@ -7,31 +7,25 @@ export const useFilteredOptions = ({
   filterFieldName,
   filterValue,
   selectedItems,
-  currentValue,
 }: FilteredOptionsProps) => {
+  const levelIndex = fieldNames.indexOf(fieldName)
+
   const options = useFieldOptions(
     fieldName,
     filterValue ? `${filterFieldName}::${filterValue}` : undefined
   )
 
-  const levelIndex = fieldNames.indexOf(fieldName)
-  let filteredOptions = [...options]
+  const parentLevelItems = selectedItems.filter(
+    (item) => item.split('>')[levelIndex - 1] === filterValue
+  )
 
-  const isLastField = levelIndex === fieldNames.length - 1
+  const filteredItems = parentLevelItems.map(
+    (item) => item.split('>')[levelIndex]
+  )
 
-  if (isLastField) {
-    const filteredItems = selectedItems
-      .map((item) => item.split('>')[levelIndex])
-      .filter((item) => item && item !== currentValue)
-
-    filteredOptions = filteredOptions.filter(
-      (option) => !filteredItems.includes(option)
-    )
-  }
-
-  if (currentValue && !filteredOptions.includes(currentValue)) {
-    filteredOptions.push(currentValue)
-  }
+  const filteredOptions = options.filter(
+    (option) => !filteredItems.includes(option)
+  )
 
   return filteredOptions
 }

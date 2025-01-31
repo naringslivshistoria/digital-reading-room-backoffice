@@ -10,8 +10,10 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material'
 import { Link } from 'react-router-dom'
+import StickyNote2Icon from '@mui/icons-material/StickyNote2'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Checkbox from '@mui/material/Checkbox'
@@ -140,8 +142,18 @@ const UserTable = ({
               ))}
               <TableCell align="right">
                 <Box
-                  sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
                 >
+                  <Tooltip title={user.notes || 'Inga anteckningar'} arrow>
+                    <StickyNote2Icon
+                      color={user.notes ? 'warning' : 'secondary'}
+                    />
+                  </Tooltip>
                   <Link
                     to={`user?id=${user.id}`}
                     state={{ user, showGrid, expandedGroup, allGroups }}

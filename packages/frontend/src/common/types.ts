@@ -190,6 +190,7 @@ interface FilteredOptionsProps {
   filterFieldName: string
   filterValue: string | undefined
   selectedItems: string[]
+  currentItems: Record<string, string>
 }
 
 interface FormSection {

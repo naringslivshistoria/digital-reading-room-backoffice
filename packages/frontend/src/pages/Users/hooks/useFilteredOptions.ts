@@ -4,8 +4,6 @@ import { FilteredOptionsProps } from '../../../common/types'
 export const useFilteredOptions = ({
   fieldName,
   fieldNames,
-  filterFieldName,
-  filterValue,
   selectedItems,
   currentItems,
 }: FilteredOptionsProps) => {
@@ -18,9 +16,15 @@ export const useFilteredOptions = ({
 
   const prefixChain = prefixChainArray.join('>')
 
+  const filterString = Object.entries(currentItems)
+    .slice(0, -1)
+    .filter(([_, value]) => value !== '')
+    .map(([key, value]) => `${key}::${value}`)
+    .join('||')
+
   const options = useFieldOptions(
     fieldName,
-    filterValue ? `${filterFieldName}::${filterValue}` : undefined
+    filterString ? filterString : undefined
   )
 
   const sameLevelSelectedItems = selectedItems.filter((sel) => {

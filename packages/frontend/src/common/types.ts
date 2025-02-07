@@ -187,9 +187,8 @@ interface UserToolbarProps {
 interface FilteredOptionsProps {
   fieldName: string
   fieldNames: string[]
-  filterFieldName: string
-  filterValue: string | undefined
   selectedItems: string[]
+  currentItems: Record<string, string>
 }
 
 interface FormSection {

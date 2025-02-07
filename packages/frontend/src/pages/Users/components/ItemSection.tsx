@@ -26,25 +26,22 @@ export const ItemSection = ({
   const archiveInitiatorOptions = useFilteredOptions({
     fieldName: 'archiveInitiator',
     fieldNames: section.fieldNames,
-    filterFieldName: 'depositor',
-    filterValue: sectionFormState.depositor,
     selectedItems,
+    currentItems: sectionFormState,
   })
 
   const rawSeriesOptions = useFilteredOptions({
     fieldName: 'seriesName',
     fieldNames: section.fieldNames,
-    filterFieldName: 'archiveInitiator',
-    filterValue: sectionFormState.archiveInitiator,
     selectedItems,
+    currentItems: sectionFormState,
   })
 
   const rawVolumeOptions = useFilteredOptions({
     fieldName: 'volume',
     fieldNames: section.fieldNames,
-    filterFieldName: 'seriesName',
-    filterValue: sectionFormState.seriesName,
     selectedItems,
+    currentItems: sectionFormState,
   })
 
   const seriesOptions = section.fieldNames.includes('seriesName')

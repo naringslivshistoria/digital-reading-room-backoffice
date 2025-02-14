@@ -8,42 +8,30 @@ export const useFilteredOptions = ({
   currentItems,
 }: FilteredOptionsProps) => {
   const levelIndex = fieldNames.indexOf(fieldName)
+  const previousFields = fieldNames.slice(0, levelIndex)
 
-  const prefixChainArray = fieldNames
-    .slice(0, levelIndex)
-    .map((pField) => currentItems[pField])
+  const filterString = previousFields
+    .map((key) => (currentItems[key] ? `${key}::${currentItems[key]}` : null))
     .filter(Boolean)
-
-  const prefixChain = prefixChainArray.join('>')
-
-  const filterString = Object.entries(currentItems)
-    .slice(0, -1)
-    .filter(([_, value]) => value !== '')
-    .map(([key, value]) => `${key}::${value}`)
     .join('||')
 
-  const options = useFieldOptions(
-    fieldName,
-    filterString ? filterString : undefined
-  )
+  const options = useFieldOptions(fieldName, filterString || undefined)
 
-  const sameLevelSelectedItems = selectedItems.filter((sel) => {
-    const parts = sel.split('>')
-    if (parts.length !== levelIndex + 1) {
-      return false
-    }
-    const itemPrefix = parts.slice(0, levelIndex).join('>')
-    return itemPrefix === prefixChain
-  })
+  const prefixChain = previousFields
+    .map((key) => currentItems[key])
+    .filter(Boolean)
+    .join('>')
 
-  const selectedValuesForThisLevel = sameLevelSelectedItems.map((sel) => {
-    const parts = sel.split('>')
-    return parts[levelIndex]
-  })
+  const selectedValuesForThisLevel = selectedItems
+    .map((sel) => sel.split('>'))
+    .filter(
+      (parts) =>
+        parts.length === levelIndex + 1 &&
+        parts.slice(0, levelIndex).join('>') === prefixChain
+    )
+    .map((parts) => parts[levelIndex])
 
-  const filteredOptions = options.filter(
+  return options.filter(
     (option) => !selectedValuesForThisLevel.includes(option)
   )
-
-  return filteredOptions
 }

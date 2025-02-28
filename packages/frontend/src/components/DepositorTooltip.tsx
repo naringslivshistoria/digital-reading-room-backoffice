@@ -1,9 +1,8 @@
-import { Box, useTheme } from '@mui/material'
+import { Box } from '@mui/material'
+
 import DepositorChip from './DepositorChip'
 
 const DepositorTooltip = ({ depositors }: { depositors: string[] }) => {
-  const theme = useTheme()
-
   return (
     <Box
       sx={{

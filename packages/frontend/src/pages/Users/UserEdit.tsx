@@ -17,12 +17,15 @@ import {
   Tooltip,
   IconButton,
   InputAdornment,
+  Snackbar,
 } from '@mui/material'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import InfoIcon from '@mui/icons-material/Info'
 import Password from '@mui/icons-material/Password'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import ContentPasteIcon from '@mui/icons-material/ContentPaste'
 
 import { useIsLoggedIn } from '../../common/hooks/useIsLoggedIn'
 import { useUpdateUser } from './hooks/useUser'
@@ -32,9 +35,15 @@ import {
   UserFormState,
   FormSection,
   FormSectionKey,
+  UserPermissions,
 } from '../../common/types'
 import { ItemSection } from './components/ItemSection'
 import { useFieldOptions } from './hooks/useFieldOptions'
+import {
+  copyUserPermissions,
+  getClipboardPermissions,
+  hasClipboardPermissions,
+} from '../../common/util/userPermissionsClipboard'
 
 export const UserEdit = () => {
   useIsLoggedIn()
@@ -43,6 +52,17 @@ export const UserEdit = () => {
   const updateUser = useUpdateUser()
   const [editUser, setEditUser] = useState<User>(location.state.user)
   const [error, setError] = useState<string | null>(null)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState('')
+
+  useEffect(() => {
+    if (location.state?.pastedPermissions) {
+      setSnackbarMessage(
+        'Rättigheter har klistrats in. Klicka på Spara för att bekräfta ändringarna.'
+      )
+      setSnackbarOpen(true)
+    }
+  }, [location.state])
 
   const [formState, setFormState] = useState<UserFormState>({
     depositors: '',
@@ -292,6 +312,87 @@ export const UserEdit = () => {
 
   const isNewUser = !location.state?.user?.username
 
+  const handleCopyPermissions = useCallback(() => {
+    copyUserPermissions(editUser)
+    setSnackbarMessage('Användarens rättigheter har kopierats')
+    setSnackbarOpen(true)
+  }, [editUser])
+
+  const applyPermissions = useCallback(
+    (permissions: UserPermissions) => {
+      const updatedUser = { ...editUser }
+      const updatedFormItems = { ...formState.selectedItems }
+
+      const permissionTypes: (keyof UserPermissions &
+        keyof typeof updatedFormItems)[] = [
+        'depositors',
+        'archiveInitiators',
+        'series',
+        'volumes',
+        'fileNames',
+      ]
+
+      permissionTypes.forEach((type) => {
+        if (permissions[type]) {
+          updatedUser[type] = permissions[type]?.join(';') || null
+          updatedFormItems[type] = permissions[type] || []
+        }
+      })
+
+      if (permissions.groups) {
+        updatedUser.groups = permissions.groups
+        setSelectedGroups(permissions.groups)
+      }
+
+      setEditUser(updatedUser)
+      setFormState((prev) => ({
+        ...prev,
+        selectedItems: updatedFormItems,
+      }))
+
+      setSnackbarMessage(
+        'Rättigheter har klistrats in. Klicka på Spara för att bekräfta ändringarna.'
+      )
+      setSnackbarOpen(true)
+    },
+    [editUser, formState.selectedItems]
+  )
+
+  const handlePastePermissions = useCallback(() => {
+    const permissions = getClipboardPermissions()
+    if (!permissions) {
+      setSnackbarMessage('Inga kopierade rättigheter att klistra in')
+      setSnackbarOpen(true)
+      return
+    }
+
+    applyPermissions(permissions)
+  }, [applyPermissions])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        document.activeElement instanceof HTMLSelectElement
+      ) {
+        return
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v')) {
+        e.preventDefault()
+        e.key === 'c' ? handleCopyPermissions() : handlePastePermissions()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleCopyPermissions, handlePastePermissions])
+
+  const handleSnackbarClose = () => setSnackbarOpen(false)
+
+  const clipboardHasPermissions = hasClipboardPermissions()
+
   return (
     editUser && (
       <>
@@ -310,6 +411,29 @@ export const UserEdit = () => {
           <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
           <Typography variant="h2">
             {isNewUser ? 'Skapa användare' : 'Administrera användare'}
+            <Box component="span" sx={{ marginLeft: 2 }}>
+              <Tooltip title="Kopiera rättigheter (Ctrl+C / Cmd+C)" arrow>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={handleCopyPermissions}
+                >
+                  <ContentCopyIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Klistra in rättigheter (Ctrl+V / Cmd+V)" arrow>
+                <span>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={handlePastePermissions}
+                    disabled={!clipboardHasPermissions}
+                  >
+                    <ContentPasteIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
           </Typography>
           <Grid
             container
@@ -658,6 +782,12 @@ export const UserEdit = () => {
             </Grid>
           </Grid>
         </Grid>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleSnackbarClose}
+          message={snackbarMessage}
+        />
       </>
     )
   )

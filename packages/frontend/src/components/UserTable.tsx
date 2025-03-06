@@ -17,8 +17,12 @@ import StickyNote2Icon from '@mui/icons-material/StickyNote2'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Checkbox from '@mui/material/Checkbox'
+import LockIcon from '@mui/icons-material/Lock'
+import BlockIcon from '@mui/icons-material/Block'
 
 import { UserTableProps } from '../common/types'
+import DepositorChip from './DepositorChip'
+import DepositorTooltip from './DepositorTooltip'
 
 const UserTable = ({
   users,
@@ -44,31 +48,37 @@ const UserTable = ({
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'))
   const visibleColumns = availableColumns.filter(
-    (column) => !isMobile || !column.hideOnMobile
+    (column) =>
+      (!isMobile || !column.hideOnMobile) &&
+      column.id !== 'locked' &&
+      column.id !== 'disabled'
   )
 
+  const MAX_DEPOSITORS = 11
+
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      users.forEach((user) => {
-        if (user.id) {
+    const checked = event.target.checked
+
+    users.forEach((user) => {
+      if (user.id) {
+        // Only call onUserSelect if we need to change the selection state
+        const isCurrentlySelected = selectedUsers.has(user.id)
+        if (checked !== isCurrentlySelected) {
           onUserSelect(user.id)
         }
-      })
-    } else {
-      users.forEach((user) => {
-        if (user.id) {
-          onUserSelect(user.id)
-        }
-      })
-    }
+      }
+    })
   }
 
   return (
     <>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table
+        sx={{ minWidth: 650, tableLayout: 'fixed' }}
+        aria-label="simple table"
+      >
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">
+            <TableCell padding="checkbox" sx={{ width: '48px' }}>
               <Checkbox
                 onChange={handleSelectAll}
                 checked={users.every(
@@ -84,12 +94,30 @@ const UserTable = ({
               <TableCell
                 key={column.id}
                 align={column.align || 'left'}
-                sx={{ whiteSpace: 'nowrap', minWidth: column.minWidth }}
+                sx={{
+                  whiteSpace: 'nowrap',
+                  minWidth: column.minWidth,
+                  width:
+                    column.id === 'depositors'
+                      ? '55%'
+                      : column.id === 'username'
+                      ? '15%'
+                      : 'auto',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  '&:hover': {
+                    overflow: 'visible',
+                    backgroundColor: theme.palette.background.paper,
+                    zIndex: 1,
+                  },
+                }}
               >
                 {column.label}
               </TableCell>
             ))}
-            <TableCell align="right">Åtgärder</TableCell>
+            <TableCell align="right" sx={{ width: '120px' }}>
+              Åtgärder
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -100,16 +128,31 @@ const UserTable = ({
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
-              <TableCell padding="checkbox">
+              <TableCell padding="checkbox" sx={{ width: '48px' }}>
                 <Checkbox
                   checked={user.id ? selectedUsers.has(user.id) : false}
                   onChange={() => user.id && onUserSelect(user.id)}
                 />
               </TableCell>
               {visibleColumns.map((column) => (
-                <TableCell key={column.id} align={column.align || 'left'}>
+                <TableCell
+                  key={column.id}
+                  align={column.align || 'left'}
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    minWidth: column.minWidth,
+                    width:
+                      column.id === 'depositors'
+                        ? '55%'
+                        : column.id === 'username'
+                        ? '15%'
+                        : 'auto',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {column.id === 'groups' ? (
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {Array.isArray(user.groups) && user.groups.length > 0 ? (
                         user.groups.map((group) => (
                           <Chip
@@ -117,7 +160,7 @@ const UserTable = ({
                             label={group}
                             variant="outlined"
                             onClick={(e) => handleGroupClick(group, e)}
-                            sx={{ cursor: 'pointer' }}
+                            sx={{ cursor: 'pointer', margin: '2px 0' }}
                           />
                         ))
                       ) : (
@@ -129,18 +172,85 @@ const UserTable = ({
                         />
                       )}
                     </Box>
-                  ) : column.id === 'locked' || column.id === 'disabled' ? (
-                    user[column.id] ? (
-                      'Ja'
-                    ) : (
-                      'Nej'
-                    )
+                  ) : column.id === 'depositors' ? (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexWrap: 'wrap',
+                        maxHeight: '72px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        width: '100%',
+                      }}
+                    >
+                      {user.depositors
+                        ?.split(';')
+                        .slice(0, MAX_DEPOSITORS)
+                        .map((depositor: string) => (
+                          <DepositorChip
+                            key={depositor}
+                            depositor={depositor}
+                            truncate={true}
+                          />
+                        ))}
+                      {user.depositors &&
+                        user.depositors.split(';').length > MAX_DEPOSITORS && (
+                          <Tooltip
+                            title={
+                              <DepositorTooltip
+                                depositors={user.depositors.split(';')}
+                              />
+                            }
+                            arrow
+                            placement="top"
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  bgcolor: 'background.paper',
+                                  '& .MuiTooltip-arrow': {
+                                    color: 'background.paper',
+                                  },
+                                  boxShadow: theme.shadows[2],
+                                  p: 0,
+                                  maxWidth: 'none',
+                                },
+                              },
+                            }}
+                          >
+                            <Chip
+                              label={`+${
+                                user.depositors.split(';').length -
+                                MAX_DEPOSITORS
+                              }`}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ cursor: 'pointer' }}
+                            />
+                          </Tooltip>
+                        )}
+                    </Box>
+                  ) : column.id === 'username' ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {user[column.id]}
+                      {user.locked && (
+                        <Tooltip title="Låst konto" arrow>
+                          <LockIcon color="error" fontSize="small" />
+                        </Tooltip>
+                      )}
+                      {user.disabled && (
+                        <Tooltip title="Avaktiverat konto" arrow>
+                          <BlockIcon color="error" fontSize="small" />
+                        </Tooltip>
+                      )}
+                    </Box>
                   ) : (
                     user[column.id]
                   )}
                 </TableCell>
               ))}
-              <TableCell align="right">
+              <TableCell align="right" sx={{ width: '120px' }}>
                 <Box
                   sx={{
                     display: 'flex',

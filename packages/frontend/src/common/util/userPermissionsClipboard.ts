@@ -43,25 +43,19 @@ export const applyPermissionsToUser = (
 ): User => {
   const updatedUser = { ...user }
 
-  if (permissions.depositors) {
-    updatedUser.depositors = permissions.depositors.join(';')
-  }
+  const arrayFields = [
+    'depositors',
+    'archiveInitiators',
+    'series',
+    'volumes',
+    'fileNames',
+  ] as const
 
-  if (permissions.archiveInitiators) {
-    updatedUser.archiveInitiators = permissions.archiveInitiators.join(';')
-  }
-
-  if (permissions.series) {
-    updatedUser.series = permissions.series.join(';')
-  }
-
-  if (permissions.volumes) {
-    updatedUser.volumes = permissions.volumes.join(';')
-  }
-
-  if (permissions.fileNames) {
-    updatedUser.fileNames = permissions.fileNames.join(';')
-  }
+  arrayFields.forEach((field) => {
+    if (permissions[field]) {
+      updatedUser[field] = permissions[field]!.join(';')
+    }
+  })
 
   if (permissions.groups) {
     updatedUser.groups = permissions.groups

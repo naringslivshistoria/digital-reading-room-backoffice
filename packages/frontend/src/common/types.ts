@@ -172,6 +172,9 @@ interface UserTableProps {
   allGroups: string[]
   selectedUsers: Set<string>
   onUserSelect: (userId: string) => void
+  onCopyPermissions?: (user: User) => void
+  onPastePermissions?: (user: User) => void
+  hasClipboardPermissions?: boolean
 }
 
 interface UserToolbarProps {
@@ -198,6 +201,15 @@ interface FormSection {
   volume?: string
 }
 
+interface UserPermissions {
+  depositors: string[] | null
+  archiveInitiators: string[] | null
+  series: string[] | null
+  volumes: string[] | null
+  fileNames: string[] | null
+  groups: string[] | null
+}
+
 export type {
   Document,
   Field,
@@ -214,4 +226,5 @@ export type {
   UserToolbarProps,
   FilteredOptionsProps,
   FormSection,
+  UserPermissions,
 }

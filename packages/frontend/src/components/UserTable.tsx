@@ -16,8 +16,6 @@ import { Link } from 'react-router-dom'
 import StickyNote2Icon from '@mui/icons-material/StickyNote2'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import ContentPasteIcon from '@mui/icons-material/ContentPaste'
 import Checkbox from '@mui/material/Checkbox'
 
 import { UserTableProps } from '../common/types'
@@ -38,9 +36,6 @@ const UserTable = ({
   allGroups,
   selectedUsers,
   onUserSelect,
-  onCopyPermissions,
-  onPastePermissions,
-  hasClipboardPermissions,
 }: UserTableProps) => {
   const currentPage = group ? pageByGroup?.[group] || 0 : page
   const startIndex = currentPage * rowsPerPage
@@ -158,31 +153,6 @@ const UserTable = ({
                     <StickyNote2Icon
                       color={user.notes ? 'warning' : 'secondary'}
                     />
-                  </Tooltip>
-                  <Tooltip title="Kopiera rättigheter" arrow>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() =>
-                        onCopyPermissions && onCopyPermissions(user)
-                      }
-                    >
-                      <ContentCopyIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Klistra in rättigheter" arrow>
-                    <span>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() =>
-                          onPastePermissions && onPastePermissions(user)
-                        }
-                        disabled={!hasClipboardPermissions}
-                      >
-                        <ContentPasteIcon />
-                      </IconButton>
-                    </span>
                   </Tooltip>
                   <Link
                     to={`user?id=${user.id}`}

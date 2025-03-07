@@ -20,12 +20,6 @@ import { User, ColumnConfig } from '../../common/types'
 import { useDeleteUser } from './hooks/useUser'
 import UserToolbar from '../../components/UserToolbar'
 import UserTable from '../../components/UserTable'
-import {
-  copyUserPermissions,
-  getClipboardPermissions,
-  hasClipboardPermissions,
-  applyPermissionsToUser,
-} from '../../common/util/userPermissionsClipboard'
 
 const Users = () => {
   useIsLoggedIn()
@@ -188,33 +182,6 @@ const Users = () => {
     }
   }
 
-  const handleCopyPermissions = (user: User) => {
-    copyUserPermissions(user)
-    console.log('Copied permissions from user:', user.username)
-  }
-
-  const handlePastePermissions = (user: User) => {
-    const permissions = getClipboardPermissions()
-    if (!permissions) return
-
-    const updatedUser = applyPermissionsToUser(user, permissions)
-
-    navigate(`user?id=${user.id}`, {
-      state: {
-        user: updatedUser,
-        showGrid,
-        expandedGroup,
-        allGroups,
-        pastedPermissions: true,
-      },
-    })
-
-    console.log(
-      'Navigating to edit user with pasted permissions:',
-      user.username
-    )
-  }
-
   return (
     <>
       <Grid item md={10} xs={10} sx={{ paddingTop: 10 }}>
@@ -329,9 +296,6 @@ const Users = () => {
                               showGrid={showGrid}
                               expandedGroup={expandedGroup}
                               allGroups={allGroups}
-                              onCopyPermissions={handleCopyPermissions}
-                              onPastePermissions={handlePastePermissions}
-                              hasClipboardPermissions={hasClipboardPermissions()}
                             />
                           </AccordionDetails>
                         </Accordion>
@@ -361,9 +325,6 @@ const Users = () => {
                     showGrid={showGrid}
                     expandedGroup={expandedGroup}
                     allGroups={allGroups}
-                    onCopyPermissions={handleCopyPermissions}
-                    onPastePermissions={handlePastePermissions}
-                    hasClipboardPermissions={hasClipboardPermissions()}
                   />
                 </TableContainer>
               )}

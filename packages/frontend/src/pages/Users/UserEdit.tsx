@@ -55,15 +55,6 @@ export const UserEdit = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
 
-  useEffect(() => {
-    if (location.state?.pastedPermissions) {
-      setSnackbarMessage(
-        'Rättigheter har klistrats in. Klicka på Spara för att bekräfta ändringarna.'
-      )
-      setSnackbarOpen(true)
-    }
-  }, [location.state])
-
   const [formState, setFormState] = useState<UserFormState>({
     depositors: '',
     archiveInitiators: { depositor: '', archiveInitiator: '' },
@@ -409,9 +400,11 @@ export const UserEdit = () => {
             </Link>
           </Box>
           <Divider sx={{ borderColor: 'red', marginBottom: '20px' }} />
-          <Typography variant="h2">
-            {isNewUser ? 'Skapa användare' : 'Administrera användare'}
-            <Box component="span" sx={{ marginLeft: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="h2">
+              {isNewUser ? 'Skapa användare' : 'Administrera användare'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Kopiera rättigheter (Ctrl+C / Cmd+C)" arrow>
                 <IconButton
                   size="small"
@@ -434,7 +427,7 @@ export const UserEdit = () => {
                 </span>
               </Tooltip>
             </Box>
-          </Typography>
+          </Box>
           <Grid
             container
             columnSpacing={4}
@@ -787,6 +780,7 @@ export const UserEdit = () => {
           autoHideDuration={4000}
           onClose={handleSnackbarClose}
           message={snackbarMessage}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         />
       </>
     )

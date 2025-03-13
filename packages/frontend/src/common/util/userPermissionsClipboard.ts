@@ -53,7 +53,7 @@ export const applyPermissionsToUser = (
 
   arrayFields.forEach((field) => {
     if (permissions[field]) {
-      updatedUser[field] = permissions[field]!.join(';')
+      updatedUser[field] = permissions[field]?.join(';') || ''
     }
   })
 

@@ -285,7 +285,7 @@ const Users = () => {
                               availableColumns={availableColumns}
                               selectedUsers={selectedUsers}
                               onUserSelect={handleUserSelect}
-                              page={page}
+                              page={pageByGroup?.[group] || 0}
                               rowsPerPage={rowsPerPage}
                               group={group}
                               pageByGroup={pageByGroup}

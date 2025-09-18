@@ -15,4 +15,7 @@ RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 COPY . .
 COPY --from=builder /app/node_modules ./node_modules
 
+ENV PORT 80
+EXPOSE 80
+
 CMD ["pnpm", "start"]

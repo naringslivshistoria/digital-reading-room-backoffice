@@ -1,7 +1,6 @@
 import KoaRouter from '@koa/router'
 import config from '../../common/config'
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types'
-import { Client } from '@elastic/elasticsearch'
+import { Client, estypes } from '@elastic/elasticsearch'
 
 const client = new Client({
   node: config.elasticSearch.url,
@@ -15,7 +14,7 @@ export const routes = (router: KoaRouter) => {
     }
 
     const levelIdsString = ctx.request.body.levelIds as string
-    const should: QueryDslQueryContainer[] = []
+    const should: estypes.QueryDslQueryContainer[] = []
 
     levelIdsString.split(',').forEach((levelId) => {
       should.push({

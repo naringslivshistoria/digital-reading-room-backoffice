@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.6.1 --activate
+RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 RUN pnpm install
 
 FROM node:18.14.1-alpine AS runner
@@ -15,7 +15,7 @@ RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 COPY . .
 COPY --from=builder /app/node_modules ./node_modules
 
-ENV PORT 80
+ENV PORT=80
 EXPOSE 80
 
 CMD ["pnpm", "start"]

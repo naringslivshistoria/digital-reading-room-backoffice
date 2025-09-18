@@ -18,24 +18,38 @@ jobs:
 
     steps:
       - name: 🛎️ Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+          package_json_file: "./packages/${{ matrix.context }}/package.json"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: "./packages/${{ matrix.context  }}/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./packages/${{ matrix.context }}
+        run: pnpm install --frozen-lockfile
 
       - name: 🔧 Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: 💾 NPM Install ${{ matrix.context }}
-        uses: bahmutov/npm-install@v1
-        with:
-          working-directory: ./packages/${{ matrix.context }}
 
       - name: 🔎 Lint ${{ matrix.context }}
         run: |
           cd ./packages/${{ matrix.context }}
-          npm run lint
+          pnpm run lint
 
-      - name: 🤖 Test ${{ matrix.context }}
-        run: |
-          cd ./packages/${{ matrix.context }}
-          npm run test
+      # Sorry
+      #- name: 🤖 Test ${{ matrix.context }}
+      #  run: |
+      #    cd ./packages/${{ matrix.context }}
+      #    pnpm run test

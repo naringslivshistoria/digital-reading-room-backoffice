@@ -1,4 +1,5 @@
 FROM node:18-slim AS builder
+WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 

@@ -1,27 +1,18 @@
-FROM node:18-slim as BUILDER
+FROM node:18.14.1 AS builder
+WORKDIR /app
 
-WORKDIR /home/app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.6.1 --activate
+RUN pnpm install
 
-# Help Docker cache npm install if neither of these files have changed
-ADD ./package.json ./package-lock.json ./
-RUN npm ci
+FROM node:18.14.1-alpine AS runner
 
-ADD ./ ./
-RUN npm run build
+# Install pnpm
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 
-# Remove stuff in node_modules we no longer need
-ENV NODE_ENV production
-RUN npm prune --production
+COPY . .
+COPY --from=builder /app/node_modules ./node_modules
 
-# A slimmed down runner image with only the bare necessities
-FROM node:18-slim AS runner
-WORKDIR /home/app
-COPY --from=BUILDER /home/app/node_modules ./node_modules
-COPY --from=BUILDER /home/app/package* ./
-COPY --from=BUILDER /home/app/build ./
-COPY --from=BUILDER /home/app/assets ./assets
-
-ENV PORT 80
-EXPOSE 80
-
-CMD node index.js
+CMD ["pnpm", "start"]

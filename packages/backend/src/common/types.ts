@@ -38,15 +38,17 @@ interface User {
 }
 
 interface ImportLevel {
-  id: number
+  id: string
   level: string
+  archivist: string
+  depositor: string
   created: Date
-  crawled: Date
-  error: string
+  crawled: Date | null
+  error: object | null
   successful: number
   failed: number
   attempts: number
-  batchName: string
+  position: number
 }
 
 interface Import {

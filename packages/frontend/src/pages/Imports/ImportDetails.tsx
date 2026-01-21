@@ -122,7 +122,7 @@ const ImportDetails = () => {
                           {level.crawled as unknown as string}
                         </TableCell>
                         <TableCell>{level.successful}</TableCell>
-                        <TableCell>{level.error}</TableCell>
+                        <TableCell>{level.error ? JSON.stringify(level.error) : ''}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
